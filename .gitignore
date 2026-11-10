@@ -20,6 +20,9 @@ htmlcov/
 
 # Logs & temporary files
 *.log
+*.aux
+*.out
+*.toc
 scratch/
 tmp/
 .system_generated/
