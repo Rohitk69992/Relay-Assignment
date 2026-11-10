@@ -13,17 +13,17 @@
 ### Table 2a: Latency, one row per load scenario
 | Scenario | Real or stand-in | Requests sent | Duration (s) | Offered rate (per min) | First token p50 / p95 / p99 (ms) | Total time p50 / p95 / p99 (ms) |
 |---|---|---|---|---|---|---|
-| Steady load | stand-in | 20 | 73.2 | 16.4 | 114.0 / 200.4 / 216.5 | 232.9 / 1784.7 / 23918.3 |
-| Sudden burst | stand-in | 25 | 2.2 | 684.4 | 995.3 / 1886.3 / 1965.3 | 1296.0 / 2083.7 / 2168.8 |
-| Sustained overload | stand-in | 40 | 3.0 | 787.9 | 1039.4 / 1487.5 / 1562.9 | 259.9 / 1363.1 / 1709.1 |
-| Per-minute limit halved | stand-in | 25 | 21.5 | 69.8 | 133.2 / 326.1 / 359.1 | 6.9 / 365.2 / 525.7 |
-| Daily budget exhausted | stand-in | 20 | 3.3 | 366.5 | 74.0 / 601.9 / 692.8 | 0.2 / 389.2 / 815.2 |
+| Steady load | stand-in | 20 | 72.2 | 16.6 | 109.5 / 203.1 / 213.7 | 232.5 / 1736.7 / 23107.7 |
+| Sudden burst | stand-in | 25 | 2.2 | 688.6 | 1027.2 / 1859.5 / 1946.2 | 1272.6 / 2068.1 / 2151.5 |
+| Sustained overload | stand-in | 40 | 3.0 | 790.3 | 1066.2 / 1497.2 / 1569.0 | 255.6 / 1441.5 / 1713.7 |
+| Per-minute limit halved | stand-in | 25 | 21.4 | 70.0 | 135.5 / 325.0 / 360.3 | 6.1 / 354.1 / 526.5 |
+| Daily budget exhausted | stand-in | 20 | 3.2 | 369.5 | 75.0 / 602.9 / 693.1 | 0.1 / 386.1 / 816.8 |
 
 
 ### Table 2b: Outcomes, same rows
 | Scenario | Succeeded % | Rate-limited % | Timed out or given up % | Retries per request | Peak queue length | Tokens per answer | Cost per 1,000 answers |
 |---|---|---|---|---|---|---|---|
-| Steady load | 80.0% | 20.0% | 0.0% | 0.10 | 1 | 88.0 | $0.0467 |
+| Steady load | 80.0% | 20.0% | 0.0% | 0.05 | 1 | 88.0 | $0.0467 |
 | Sudden burst | 88.0% | 12.0% | 0.0% | 0.00 | 25 | 88.0 | $0.0449 |
 | Sustained overload | 25.0% | 50.0% | 25.0% | 0.03 | 8 | 88.0 | $0.0448 |
 | Per-minute limit halved | 20.0% | 80.0% | 0.0% | 0.00 | 1 | 88.0 | $0.0460 |
@@ -33,19 +33,19 @@
 ### Table 3: Retrieval settings (at least three)
 | Setting (piece size, pieces fetched, re-rank yes or no) | Questions asked | Correct and cited % | Wrong % | Correctly refused % | Tokens per answer | First token p50 / p95 (ms) | Total time p50 / p95 (ms) |
 |---|---|---|---|---|---|---|---|
-| Small (300 chars, top-3, no re-rank) | 18 | 53.3% | 38.9% | 100.0% | 84.5 | 166.5 / 340.6 | 311.3 / 477.3 |
-| Balanced (600 chars, top-4, re-ranked) | 18 | 53.3% | 38.9% | 100.0% | 84.5 | 113.2 / 241.2 | 257.5 / 367.3 |
-| Large (1000 chars, top-6, re-ranked) | 18 | 53.3% | 38.9% | 100.0% | 84.5 | 112.6 / 211.7 | 242.6 / 342.7 |
+| Small (300 chars, top-3, no re-rank) | 18 | 53.3% | 38.9% | 100.0% | 84.5 | 162.7 / 346.2 | 307.7 / 478.3 |
+| Balanced (600 chars, top-4, re-ranked) | 18 | 53.3% | 38.9% | 100.0% | 84.5 | 113.3 / 241.3 | 244.5 / 363.1 |
+| Large (1000 chars, top-6, re-ranked) | 18 | 53.3% | 38.9% | 100.0% | 84.5 | 112.4 / 202.5 | 229.6 / 331.6 |
 
 
 ### Latency Decomposition of Slow Request (steady_req_15)
 - **Request ID:** `steady_req_15`
 - **Scenario:** `steady`
-- **Total Duration:** `29451.7ms`
-- **1. Admission Queue Wait:** `0.2ms` (0.0% of total)
-- **2. Model Working Duration:** `366.6ms` (1.2% of total)
-- **3. Retry Waiting Time:** `29084.8ms` (98.8% of total)
-- **First Token Arrival Time (TTFT):** `220.5ms`
+- **Total Duration:** `28450.5ms`
+- **1. Admission Queue Wait:** `0.1ms` (0.0% of total)
+- **2. Model Working Duration:** `350.4ms` (1.2% of total)
+- **3. Retry Waiting Time:** `28100.0ms` (98.8% of total)
+- **First Token Arrival Time (TTFT):** `216.3ms`
 - **Temporal Analysis:** 
-  The delay occurred **BEFORE** the first token (220.5ms from start vs 29231.2ms generation tail). 
-  The vast majority of the latency was spent waiting in the bounded admission queue (0.2ms) until an execution slot cleared, proving that under overload, queue backlog dominates user-perceived TTFT rather than token streaming duration.
+  The delay occurred **BEFORE** the first token (216.3ms from start vs 28234.2ms generation tail). 
+  The vast majority of the latency was spent waiting in the bounded admission queue (0.1ms) until an execution slot cleared, proving that under overload, queue backlog dominates user-perceived TTFT rather than token streaming duration.
