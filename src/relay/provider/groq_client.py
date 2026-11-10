@@ -21,7 +21,10 @@ class GroqProvider(ModelProviderBase):
         model: Optional[str] = None,
         timeout_seconds: float = 30.0
     ):
-        raw_key = api_key or (settings.GROQ_API_KEY.get_secret_value() if settings.GROQ_API_KEY else None)
+        if api_key is not None:
+            raw_key = api_key.strip() if api_key.strip() else None
+        else:
+            raw_key = (settings.GROQ_API_KEY.get_secret_value() if settings.GROQ_API_KEY else None)
         self.api_key = raw_key
         self.base_url = (base_url or settings.GROQ_BASE_URL).rstrip("/")
         self.model = model or settings.GROQ_MODEL
@@ -43,6 +46,22 @@ class GroqProvider(ModelProviderBase):
         temperature: float = 0.0
     ) -> ProviderResponse:
         timer = MonotonicTimer()
+
+        if not self.api_key:
+            total_ms = timer.mark_complete()
+            return ProviderResponse(
+                content="Configuration error: GROQ_API_KEY is not configured. Please configure GROQ_API_KEY in your local .env file and restart the server, or set PROVIDER_MODE=standin for offline extractive simulation.",
+                tokens_in=0,
+                tokens_out=0,
+                first_token_ms=None,
+                total_ms=total_ms,
+                model=self.model,
+                headers={},
+                http_status=503,
+                error_type="unconfigured_groq_key",
+                is_simulation=False
+            )
+
         url = f"{self.base_url}/chat/completions"
         messages = []
         if system_prompt:
@@ -113,6 +132,13 @@ class GroqProvider(ModelProviderBase):
         temperature: float = 0.0
     ) -> AsyncIterator[str]:
         """Streams tokens from Groq via Server-Sent Events (SSE)."""
+        if not self.api_key:
+            raise ValueError(
+                "Configuration error: GROQ_API_KEY is not configured. "
+                "Please configure GROQ_API_KEY in your local .env file and restart the server, "
+                "or set PROVIDER_MODE=standin for offline extractive simulation."
+            )
+
         url = f"{self.base_url}/chat/completions"
         messages = []
         if system_prompt:

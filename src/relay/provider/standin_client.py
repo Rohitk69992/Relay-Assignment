@@ -170,28 +170,50 @@ class StandInProvider(ModelProviderBase):
         return base_ms * concurrency_penalty
 
     def _synthesize_response(self, prompt: str) -> str:
-        """Generates an auditable, explicitly marked synthetic diagnostic response grounded in prompt passages."""
-        # Check if prompt contains retrieved research passages
-        if "Paper: " in prompt and "Page: " in prompt:
-            import re
-            m = re.search(r'Paper:\s*([^\n\(]+).*?Page:\s*(\d+)(?:.*?Section:\s*([^\n]+))?', prompt, re.DOTALL)
-            if m:
-                title = m.group(1).strip()
-                page = m.group(2).strip()
-                sec = (m.group(3) or "Key Findings").strip()
-                return (
-                    f"Based on [{title}, Page {page}, Section {sec}], "
-                    "the architectural parameters and experimental findings align with the published results."
-                )
+        """Generates an honest, explicitly marked extractive response grounded in prompt passages."""
         if "REFUSAL" in prompt or "None" in prompt:
             return "REFUSAL: The supplied research library does not establish the answer to this question."
 
+        # Check if prompt contains formatted research passages from build_user_prompt
+        if "--- Passage " in prompt and "Text:" in prompt:
+            import re
+            from src.relay.schemas import DocumentChunk
+            # Extract user question from prompt
+            q_match = re.search(r'User Question:\s*(.*?)\s*Retrieved Research Passages', prompt, re.DOTALL)
+            question = q_match.group(1).strip() if q_match else ""
+
+            # Extract chunks from prompt
+            blocks = prompt.split("--- Passage ")
+            chunks: List[DocumentChunk] = []
+            for b in blocks[1:]:
+                p_match = re.search(r'Paper:\s*([^\n\(]+)(?:\(arXiv:([^\)]+)\))?', b)
+                page_match = re.search(r'Page:\s*(\d+)', b)
+                sec_match = re.search(r'Section:\s*([^\n]+)', b)
+                text_match = re.search(r'Text:\s*(.*?)(?=\nInstructions:|\Z)', b, re.DOTALL)
+
+                if p_match and page_match and text_match:
+                    title = p_match.group(1).strip()
+                    paper_id = p_match.group(2).strip() if p_match.group(2) else "1706.03762v7"
+                    page_num = int(page_match.group(1))
+                    sec_name = sec_match.group(1).strip() if sec_match else "Overview"
+                    chunk_text = text_match.group(1).strip()
+                    chunks.append(DocumentChunk(
+                        paper_id=paper_id,
+                        paper_title=title,
+                        page_number=page_num,
+                        section_name=sec_name,
+                        chunk_index=0,
+                        text=chunk_text
+                    ))
+
+            if chunks:
+                from src.relay.pipeline.generator import AnswerGenerator
+                return AnswerGenerator.build_standin_answer(question, chunks, is_refusal=False)
+
         return (
-            "[STAND-IN SYNTHESIS: Modeled response grounded in retrieved context]\n"
-            f"Analysis of query: {prompt[:80]}...\n"
-            "Key factual findings derived from referenced paper passages:\n"
-            "- Structural components and algorithmic parameters verified.\n"
-            "- Empirical results align with documented evaluation tables."
+            "[Stand-in evidence preview — extractive simulation, not LLM-generated] [STAND-IN SYNTHESIS]\n"
+            f"Simulated response for query: {prompt[:80]}...\n"
+            "(Notice: Stand-in provider performs offline latency and rate-limit simulation.)"
         )
 
     async def generate(
@@ -199,7 +221,8 @@ class StandInProvider(ModelProviderBase):
         prompt: str,
         system_prompt: str = "",
         max_tokens: int = 1024,
-        temperature: float = 0.0
+        temperature: float = 0.0,
+        precomputed_text: Optional[str] = None
     ) -> ProviderResponse:
         timer = MonotonicTimer()
         estimated_prompt_tokens = max(10, len(prompt) // 4)
@@ -274,7 +297,7 @@ class StandInProvider(ModelProviderBase):
             first_token_ms = timer.mark_first_token()
 
             # Generation duration based on tokens per second
-            content = self._synthesize_response(prompt)
+            content = precomputed_text if precomputed_text is not None else self._synthesize_response(prompt)
             output_tokens = max(10, len(content) // 4)
             gen_duration_s = output_tokens / self.tokens_per_sec
             await asyncio.sleep(gen_duration_s)
@@ -305,9 +328,11 @@ class StandInProvider(ModelProviderBase):
         prompt: str,
         system_prompt: str = "",
         max_tokens: int = 1024,
-        temperature: float = 0.0
+        temperature: float = 0.0,
+        precomputed_text: Optional[str] = None
     ) -> AsyncIterator[str]:
-        """Streams synthetic response broken into sequential words with inter-token delays."""
+        """Streams synthetic response broken into sequential token chunks with simulated TTFT and delays."""
+        import re
         estimated_prompt_tokens = max(10, len(prompt) // 4)
         estimated_gen_tokens = 120
 
@@ -327,13 +352,51 @@ class StandInProvider(ModelProviderBase):
             actual_ttft_ms = self.compute_load_inflated_ttft(base_ttft)
             await asyncio.sleep(actual_ttft_ms / 1000.0)
 
-            content = self._synthesize_response(prompt)
-            words = content.split(" ")
+            content = precomputed_text if precomputed_text is not None else self._synthesize_response(prompt)
+            # Use regex to split words while preserving whitespace
+            words = re.findall(r'\S+\s*', content)
+            if not words:
+                words = [content]
             delay_per_word = max(0.002, (1.0 / self.tokens_per_sec) * 1.3)
 
             for w in words:
                 await asyncio.sleep(delay_per_word)
-                yield w + " "
+                yield w
+        finally:
+            async with self._lock:
+                self.in_flight_count = max(0, self.in_flight_count - 1)
+
+    async def stream_text(
+        self,
+        text: str
+    ) -> AsyncIterator[str]:
+        """Streams precomputed text chunks with simulated TTFT and inter-word delays."""
+        import re
+        estimated_gen_tokens = max(10, len(text) // 4)
+        limit_violation = await self.quota_tracker.check_and_consume(estimated_gen_tokens)
+        if limit_violation:
+            raise StandInQuotaExhaustedError(
+                limit_violation["message"],
+                retry_after_s=limit_violation["retry_after"],
+                limit_type=limit_violation["type"]
+            )
+
+        async with self._lock:
+            self.in_flight_count += 1
+
+        try:
+            base_ttft = self.sample_base_ttft_ms()
+            actual_ttft_ms = self.compute_load_inflated_ttft(base_ttft)
+            await asyncio.sleep(actual_ttft_ms / 1000.0)
+
+            words = re.findall(r'\S+\s*', text)
+            if not words:
+                words = [text]
+            delay_per_word = max(0.002, (1.0 / self.tokens_per_sec) * 1.3)
+
+            for w in words:
+                await asyncio.sleep(delay_per_word)
+                yield w
         finally:
             async with self._lock:
                 self.in_flight_count = max(0, self.in_flight_count - 1)

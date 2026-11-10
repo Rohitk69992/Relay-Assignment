@@ -304,8 +304,38 @@
       font-size: 0.95rem;
       line-height: 1.65;
       color: #f8fafc;
-      white-space: pre-wrap;
       margin-bottom: 1.25rem;
+    }
+    .banner-standin {
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      color: #fcd34d;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 0.45rem 0.85rem;
+      border-radius: 5px;
+      margin-bottom: 1rem;
+      letter-spacing: 0.02em;
+    }
+    .citation-inline {
+      background: rgba(59, 130, 246, 0.15);
+      color: #93c5fd;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 0.82rem;
+      display: inline-block;
+      margin: 2px 0;
+    }
+    .alert-box {
+      border: 1px solid #ef4444;
+      background: rgba(239, 68, 68, 0.1);
+      padding: 1rem;
+      border-radius: 6px;
+      color: #fca5a5;
+      font-size: 0.9rem;
+      line-height: 1.5;
     }
 
     .citations-section {
@@ -552,7 +582,8 @@
             <div class="tel-item"><span>Queue Wait Time</span><strong id="tel-queue-wait">—</strong></div>
             <div class="tel-item"><span>Tokens (Prompt / Generated)</span><strong id="tel-tokens">—</strong></div>
             <div class="tel-item"><span>Retry Count</span><strong id="tel-retries">0</strong></div>
-            <div class="tel-item"><span>Grounding Verification</span><strong id="tel-grounded">Verified</strong></div>
+            <div class="tel-item"><span>Citation Validation</span><strong id="tel-citation-val">Passed</strong></div>
+            <div class="tel-item"><span>Answer Quality</span><strong id="tel-answer-qual">Not independently evaluated</strong></div>
           </div>
         </details>
       </div>
@@ -824,6 +855,45 @@
       }
     }
 
+    function escapeHtml(text) {
+      if (!text) return '';
+      return String(text)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function formatAnswerMarkdown(rawText) {
+      if (!rawText) return '<span style="color:#64748b;">(No response generated)</span>';
+      let safe = escapeHtml(rawText);
+
+      // Stand-in banner highlight
+      safe = safe.replace(/\[Stand-in evidence preview [^\]]+\]/g, '<div class="banner-standin">$&</div>');
+
+      // Markdown Headers (###, ##, #)
+      safe = safe.replace(/^### (.*?)$/gm, '<h3 style="color:#60a5fa; margin:1rem 0 0.4rem; font-size:1.05rem; font-weight:700;">$1</h3>');
+      safe = safe.replace(/^## (.*?)$/gm, '<h2 style="color:#93c5fd; margin:1.25rem 0 0.5rem; font-size:1.15rem; font-weight:700;">$1</h2>');
+      safe = safe.replace(/^# (.*?)$/gm, '<h1 style="color:#bfdbfe; margin:1.5rem 0 0.6rem; font-size:1.25rem; font-weight:800;">$1</h1>');
+
+      // Bold text
+      safe = safe.replace(/\*\*(.*?)\*\*/g, '<strong style="color:#ffffff;">$1</strong>');
+
+      // Blockquotes
+      safe = safe.replace(/^> (.*?)$/gm, '<blockquote style="border-left:3px solid #3b82f6; padding-left:0.75rem; color:#94a3b8; margin:0.5rem 0;">$1</blockquote>');
+
+      // Inline code
+      safe = safe.replace(/`([^`]+)`/g, '<code style="background:#080d14; border:1px solid #1e293b; padding:1px 5px; border-radius:3px; color:#a5b4fc; font-family:monospace; font-size:0.88rem;">$1</code>');
+
+      // In-text bracketed citations
+      safe = safe.replace(/(\[(?:Attention Is All You Need|Moshi[^,]*|Dynamic Chunking[^,]*)[^\]]+\])/g, '<span class="citation-inline">$1</span>');
+
+      // Paragraphs
+      const paragraphs = safe.split(/\n\s*\n/);
+      return paragraphs.map(p => `<p style="margin-bottom:0.8rem; line-height:1.65;">${p.replace(/\n/g, '<br>')}</p>`).join('');
+    }
+
     async function submitQuery() {
       const q = document.getElementById('question-input').value.trim();
       if (!q) {
@@ -843,7 +913,7 @@
       const citationsList = document.getElementById('citations-list');
 
       ansCard.style.display = 'block';
-      ansText.textContent = '';
+      ansText.innerHTML = '<span style="color:#94a3b8;"><span class="loading-spinner"></span> Initializing pipeline...</span>';
       citationsList.innerHTML = '';
 
       ansScope.textContent = `SCOPE: ${selectedPaperScope === 'all' ? 'All 3 Papers' : selectedPaperScope}`;
@@ -863,6 +933,8 @@
         rerank: rerank,
         stream: isStream
       };
+
+      let accumulatedStreamText = '';
 
       try {
         if (!isStream) {
@@ -897,17 +969,39 @@
                 if (dataStr === '[DONE]') break;
                 try {
                   const ev = JSON.parse(dataStr);
-                  if (ev.event === 'token') {
-                    ansText.textContent += ev.content;
+                  if (ev.event === 'start') {
+                    if (ev.request_id) document.getElementById('tel-req-id').textContent = ev.request_id;
+                    if (ev.model) document.getElementById('tel-model').textContent = ev.model;
+                    if (ev.source) document.getElementById('tel-source').textContent = ev.source.toUpperCase();
+                    if (ev.provider === 'groq') {
+                      ansProvider.className = 'pill pill-ok';
+                      ansProvider.textContent = `PROVIDER: Groq Live Model (${ev.model || 'openai/gpt-oss-20b'})`;
+                    } else {
+                      ansProvider.className = 'pill pill-provider';
+                      ansProvider.textContent = 'PROVIDER: Stand-in (Extractive Simulation, Exploratory Calibration)';
+                    }
+                  } else if (ev.event === 'token') {
+                    accumulatedStreamText += ev.content;
+                    ansText.innerHTML = formatAnswerMarkdown(accumulatedStreamText);
                     if (ev.first_token_ms && document.getElementById('tel-ttft').textContent === '—') {
                       document.getElementById('tel-ttft').textContent = `${ev.first_token_ms.toFixed(1)} ms`;
                     }
                   } else if (ev.event === 'done') {
-                    renderTelemetryDone(ev);
+                    renderTelemetryDone(ev, accumulatedStreamText);
                   } else if (ev.event === 'error') {
                     ansStatus.className = 'pill pill-err';
                     ansStatus.textContent = `ERROR: ${ev.status || 500}`;
-                    ansText.textContent = `Error: ${ev.error}`;
+                    if (ev.request_id) document.getElementById('tel-req-id').textContent = ev.request_id;
+                    if (ev.error && ev.error.includes('GROQ_API_KEY')) {
+                      ansText.innerHTML = `
+                        <div class="alert-box">
+                          <strong>Configuration Notice:</strong> GROQ_API_KEY is not configured in .env.<br>
+                          Please set <code>GROQ_API_KEY</code> in your local <code>.env</code> file and restart the server, or set <code>PROVIDER_MODE=standin</code> for offline extractive simulation. (Never enter credentials in the browser).
+                        </div>
+                      `;
+                    } else {
+                      ansText.innerHTML = `<div class="alert-box"><strong>Pipeline Error (${ev.status || 500}):</strong> ${escapeHtml(ev.error)}</div>`;
+                    }
                   }
                 } catch (err) {}
               }
@@ -917,7 +1011,7 @@
       } catch (err) {
         ansStatus.className = 'pill pill-err';
         ansStatus.textContent = 'NETWORK ERROR';
-        ansText.textContent = `Connection failure: ${err.message}`;
+        ansText.innerHTML = `<div class="alert-box"><strong>Network Failure:</strong> ${escapeHtml(err.message)}</div>`;
       } finally {
         btn.disabled = false;
         btn.innerHTML = '<span>Execute Pipeline</span>';
@@ -930,7 +1024,7 @@
       const ansProvider = document.getElementById('ans-provider-pill');
       const citationsList = document.getElementById('citations-list');
 
-      ansText.textContent = data.answer || '(No text returned)';
+      ansText.innerHTML = formatAnswerMarkdown(data.answer);
 
       if (data.answer && data.answer.startsWith('REFUSAL:')) {
         ansStatus.className = 'pill pill-refusal';
@@ -943,7 +1037,13 @@
         ansStatus.textContent = `STATUS: ${data.status.toUpperCase()}`;
       }
 
-      ansProvider.textContent = `PROVIDER: ${(data.source || 'stand-in').toUpperCase()} (${data.model || 'calibrated'})`;
+      if (data.source === 'real' || (data.model && data.model.includes('groq'))) {
+        ansProvider.className = 'pill pill-ok';
+        ansProvider.textContent = `PROVIDER: Groq Live Model (${data.model || 'openai/gpt-oss-20b'})`;
+      } else {
+        ansProvider.className = 'pill pill-provider';
+        ansProvider.textContent = 'PROVIDER: Stand-in (Extractive Simulation, Exploratory Calibration)';
+      }
 
       if (data.citations && data.citations.length > 0) {
         citationsList.innerHTML = '';
@@ -952,8 +1052,8 @@
           div.className = 'citation-tag';
           div.innerHTML = `
             <div>
-              <span class="citation-paper">${c.paper_title || c.paper_id}</span>
-              ${c.section ? `<span style="color:#94a3b8; font-size:0.75rem;"> — ${c.section}</span>` : ''}
+              <span class="citation-paper">${escapeHtml(c.paper_title || c.paper_id)}</span>
+              ${c.section ? `<span style="color:#94a3b8; font-size:0.75rem;"> — ${escapeHtml(c.section)}</span>` : ''}
             </div>
             <span class="citation-page">P. ${c.page}</span>
           `;
@@ -971,10 +1071,37 @@
       document.getElementById('tel-queue-wait').textContent = data.queue_wait_ms ? `${data.queue_wait_ms.toFixed(1)} ms` : '0.0 ms';
       document.getElementById('tel-tokens').textContent = `${data.tokens_in || 0} in / ${data.tokens_out || 0} out`;
       document.getElementById('tel-retries').textContent = data.retries || '0';
-      document.getElementById('tel-grounded').textContent = (data.answer && data.answer.startsWith('REFUSAL:')) ? 'Safe Refusal' : 'Audited Citation Match';
+      document.getElementById('tel-citation-val').textContent = (data.answer && data.answer.startsWith('REFUSAL:')) ? 'Safe Refusal' : ((data.citations && data.citations.length > 0) ? 'Passed' : 'Failed');
+      document.getElementById('tel-answer-qual').textContent = 'Not independently evaluated';
     }
 
-    function renderTelemetryDone(ev) {
+    function renderTelemetryDone(ev, fullText) {
+      const ansStatus = document.getElementById('ans-status-pill');
+      const ansProvider = document.getElementById('ans-provider-pill');
+
+      if (fullText && fullText.startsWith('REFUSAL:')) {
+        ansStatus.className = 'pill pill-refusal';
+        ansStatus.textContent = 'REFUSAL ISSUED';
+      } else if (ev.status === 'ok' || ev.verified) {
+        ansStatus.className = 'pill pill-ok';
+        ansStatus.textContent = 'STATUS: OK (200)';
+      } else if (ev.status === 'refusal') {
+        ansStatus.className = 'pill pill-refusal';
+        ansStatus.textContent = 'REFUSAL ISSUED';
+      } else {
+        ansStatus.className = 'pill pill-ok';
+        ansStatus.textContent = 'STREAM COMPLETED';
+      }
+
+      if (ev.provider === 'groq' || ev.source === 'real') {
+        ansProvider.className = 'pill pill-ok';
+        ansProvider.textContent = `PROVIDER: Groq Live Model (${ev.model || 'openai/gpt-oss-20b'})`;
+      } else {
+        ansProvider.className = 'pill pill-provider';
+        ansProvider.textContent = 'PROVIDER: Stand-in (Extractive Simulation, Exploratory Calibration)';
+      }
+
+      document.getElementById('tel-req-id').textContent = ev.request_id || document.getElementById('tel-req-id').textContent;
       document.getElementById('tel-total-time').textContent = ev.total_ms ? `${ev.total_ms.toFixed(1)} ms` : '—';
       if (ev.first_token_ms) {
         document.getElementById('tel-ttft').textContent = `${ev.first_token_ms.toFixed(1)} ms`;
@@ -984,6 +1111,8 @@
       document.getElementById('tel-tokens').textContent = `${ev.tokens_in || 0} in / ${ev.tokens_out || 0} out`;
       document.getElementById('tel-retries').textContent = ev.retries || '0';
       document.getElementById('tel-queue-wait').textContent = ev.queue_wait_ms ? `${ev.queue_wait_ms.toFixed(1)} ms` : '0.0 ms';
+      document.getElementById('tel-citation-val').textContent = (ev.citation_validation === 'passed') ? 'Passed' : ((ev.citation_validation === 'refusal') ? 'Safe Refusal' : 'Failed');
+      document.getElementById('tel-answer-qual').textContent = 'Not independently evaluated';
 
       const citationsList = document.getElementById('citations-list');
       if (ev.citations && ev.citations.length > 0) {
@@ -993,8 +1122,8 @@
           div.className = 'citation-tag';
           div.innerHTML = `
             <div>
-              <span class="citation-paper">${c.paper_title || c.paper_id}</span>
-              ${c.section ? `<span style="color:#94a3b8; font-size:0.75rem;"> — ${c.section}</span>` : ''}
+              <span class="citation-paper">${escapeHtml(c.paper_title || c.paper_id)}</span>
+              ${c.section ? `<span style="color:#94a3b8; font-size:0.75rem;"> — ${escapeHtml(c.section)}</span>` : ''}
             </div>
             <span class="citation-page">P. ${c.page}</span>
           `;

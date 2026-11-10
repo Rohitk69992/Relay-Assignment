@@ -41,10 +41,13 @@ class PipelineOrchestrator:
         retry_mgr: Optional[RetryManager] = None
     ):
         self.retriever = retriever or ResearchRetriever()
-        self.provider = provider or (
-            GroqProvider() if settings.PROVIDER_MODE == ProviderMode.GROQ and settings.is_groq_available()
-            else StandInProvider()
-        )
+        if provider:
+            self.provider = provider
+        elif settings.PROVIDER_MODE == ProviderMode.GROQ:
+            self.provider = GroqProvider()
+        else:
+            self.provider = StandInProvider()
+
         self.queue_mgr = queue_mgr or AdmissionQueueManager()
         self.rate_limiter = rate_limiter or ClientRateLimiter()
         self.retry_mgr = retry_mgr or RetryManager()
@@ -52,6 +55,12 @@ class PipelineOrchestrator:
         self.intent_planner = IntentPlanner()
         self.sufficiency_evaluator = SufficiencyEvaluator()
         self.verifier = ResponseVerifier()
+
+    def _get_provider_names(self) -> Tuple[str, str]:
+        """Returns (provider_name, model_name)."""
+        if isinstance(self.provider, GroqProvider):
+            return "groq", self.provider.model
+        return "standin", getattr(self.provider, "model", "stand-in-calibrated")
 
     async def execute_request(
         self,
@@ -63,6 +72,33 @@ class PipelineOrchestrator:
         queue_wait_ms = 0.0
         retry_wait_ms = 0.0
         retries = 0
+        provider_name, model_name = self._get_provider_names()
+
+        # Check configuration: No silent fallback
+        if isinstance(self.provider, GroqProvider) and not self.provider.api_key:
+            total_ms = total_timer.mark_complete()
+            return PipelineResponse(
+                request_id=request.request_id,
+                scenario=request.scenario,
+                source=SourceType.REAL,
+                start_time=req_start_wall,
+                answer=(
+                    "Configuration Error: PROVIDER_MODE is configured as 'groq', but GROQ_API_KEY is missing or empty. "
+                    "Please configure GROQ_API_KEY in your local .env file and restart the server, "
+                    "or set PROVIDER_MODE=standin for offline extractive simulation."
+                ),
+                status=RequestStatus.ERROR,
+                first_token_ms=None,
+                total_ms=total_ms,
+                queue_wait_ms=0.0,
+                processing_ms=0.0,
+                retries=0,
+                tokens_in=0,
+                tokens_out=0,
+                retrieval_setting=request.retrieval_setting.label,
+                model=self.provider.model,
+                error_message="GROQ_API_KEY is not configured in .env"
+            )
 
         # STAGE 1: Admission Control & Queue Buffering
         try:
@@ -86,6 +122,7 @@ class PipelineOrchestrator:
                 tokens_in=0,
                 tokens_out=0,
                 retrieval_setting=request.retrieval_setting.label,
+                model=model_name,
                 error_message=str(e)
             )
         except QueueTimeoutError as e:
@@ -106,6 +143,7 @@ class PipelineOrchestrator:
                 tokens_in=0,
                 tokens_out=0,
                 retrieval_setting=request.retrieval_setting.label,
+                model=model_name,
                 error_message=str(e)
             )
 
@@ -131,10 +169,10 @@ class PipelineOrchestrator:
                         tokens_in=0,
                         tokens_out=0,
                         retrieval_setting=request.retrieval_setting.label,
+                        model=model_name,
                         error_message=reason
                     )
                 else:
-                    # Wait if backoff is small and within deadline
                     if wait_sec < 2.0:
                         await asyncio.sleep(wait_sec)
                         retry_wait_ms += wait_sec * 1000.0
@@ -164,8 +202,45 @@ class PipelineOrchestrator:
                     retries=0,
                     tokens_in=15,
                     tokens_out=25,
-                    retrieval_setting=request.retrieval_setting.label
+                    retrieval_setting=request.retrieval_setting.label,
+                    model=model_name
                 )
+
+            # Check Scope Mismatch: query explicitly targets a different paper than selected scope
+            if request.target_papers and "all" not in request.target_papers:
+                if query_plan.target_papers and not any(p in request.target_papers for p in query_plan.target_papers):
+                    paper_titles = {
+                        "1706.03762v7": "Attention Is All You Need",
+                        "2410.00037v1": "Moshi",
+                        "2507.07955v2": "Dynamic Chunking"
+                    }
+                    detected = [paper_titles.get(p, p) for p in query_plan.target_papers]
+                    locked = [paper_titles.get(p, p) for p in request.target_papers]
+                    refusal_msg = (
+                        f"REFUSAL: The question targets topics from {', '.join(detected)}, "
+                        f"but the retrieval scope is strictly locked to {', '.join(locked)}. "
+                        f"The selected paper does not establish the answer."
+                    )
+                    total_ms = total_timer.mark_complete()
+                    return PipelineResponse(
+                        request_id=request.request_id,
+                        scenario=request.scenario,
+                        source=request.source,
+                        start_time=req_start_wall,
+                        answer=refusal_msg,
+                        status=RequestStatus.OK,
+                        answer_grade=None,
+                        first_token_ms=queue_wait_ms + 10.0,
+                        total_ms=total_ms,
+                        queue_wait_ms=queue_wait_ms,
+                        processing_ms=total_ms - queue_wait_ms,
+                        retries=0,
+                        tokens_in=max(10, len(request.question) // 4),
+                        tokens_out=25,
+                        retrieval_setting=request.retrieval_setting.label,
+                        target_papers=request.target_papers,
+                        model=model_name
+                    )
 
             # STAGE 3: Research-Paper Retrieval Tool Invocation
             retrieval_result = self.retriever.retrieve(
@@ -183,7 +258,6 @@ class PipelineOrchestrator:
             )
 
             if not is_sufficient and refined_query != query_plan.original_query:
-                # Perform bounded refinement loop (at most 1 iteration)
                 refined_result = self.retriever.retrieve(
                     query=refined_query,
                     setting=request.retrieval_setting,
@@ -197,7 +271,7 @@ class PipelineOrchestrator:
                     refinement_count=1
                 )
 
-            # Check if evidence is still insufficient (e.g. key terms completely absent)
+            # Check if evidence is still insufficient
             if not is_sufficient or not chunks:
                 scope_desc = (
                     f"in the selected paper scope ({', '.join(request.target_papers)})"
@@ -226,7 +300,7 @@ class PipelineOrchestrator:
                     tokens_out=25,
                     retrieval_setting=request.retrieval_setting.label,
                     target_papers=request.target_papers,
-                    model=getattr(self.provider, "model", "stand-in-calibrated")
+                    model=model_name
                 )
 
             # STAGE 6: Answer Generation via Model Provider with Retry Management
@@ -237,15 +311,13 @@ class PipelineOrchestrator:
             model_timer = MonotonicTimer()
 
             while True:
-                # Dispatch to provider
                 if isinstance(self.provider, StandInProvider):
                     standin_text = AnswerGenerator.build_standin_answer(request.question, chunks, is_refusal=False)
                     provider_resp = await self.provider.generate(
                         prompt=user_prompt,
-                        system_prompt=SYSTEM_PROMPT
+                        system_prompt=SYSTEM_PROMPT,
+                        precomputed_text=standin_text
                     )
-                    if provider_resp.http_status == 200:
-                        provider_resp.content = standin_text
                 else:
                     provider_resp = await self.provider.generate(
                         prompt=user_prompt,
@@ -281,7 +353,7 @@ class PipelineOrchestrator:
                         scenario=request.scenario,
                         source=request.source,
                         start_time=req_start_wall,
-                        answer="",
+                        answer=provider_resp.content or f"Provider call failed with HTTP {provider_resp.http_status}",
                         status=status,
                         answer_grade=None,
                         first_token_ms=None,
@@ -293,6 +365,7 @@ class PipelineOrchestrator:
                         tokens_in=provider_resp.tokens_in,
                         tokens_out=0,
                         retrieval_setting=request.retrieval_setting.label,
+                        model=model_name,
                         error_message=f"Provider call failed: HTTP {provider_resp.http_status} ({provider_resp.error_type})"
                     )
 
@@ -325,7 +398,7 @@ class PipelineOrchestrator:
                 tokens_out=provider_resp.tokens_out,
                 retrieval_setting=request.retrieval_setting.label,
                 target_papers=request.target_papers,
-                model=provider_resp.model or getattr(self.provider, "model", "stand-in-calibrated"),
+                model=provider_resp.model or model_name,
                 error_message=None
             )
 
@@ -339,6 +412,31 @@ class PipelineOrchestrator:
         """Executes full pipeline streaming tokens in real time via Server-Sent Events."""
         total_timer = MonotonicTimer()
         queue_wait_ms = 0.0
+        provider_name, model_name = self._get_provider_names()
+
+        # Emit initial start event with request_id and provider metadata
+        yield {
+            "event": "start",
+            "request_id": request.request_id,
+            "model": model_name,
+            "provider": provider_name,
+            "source": request.source.value
+        }
+
+        # Check configuration: No silent fallback
+        if isinstance(self.provider, GroqProvider) and not self.provider.api_key:
+            yield {
+                "event": "error",
+                "request_id": request.request_id,
+                "status": 503,
+                "error": (
+                    "Configuration Error: PROVIDER_MODE is configured as 'groq', but GROQ_API_KEY is missing or empty. "
+                    "Please configure GROQ_API_KEY in your local .env file and restart the server, "
+                    "or set PROVIDER_MODE=standin for offline extractive simulation."
+                ),
+                "total_ms": total_timer.mark_complete()
+            }
+            return
 
         try:
             enqueue_time = await self.queue_mgr.enter_queue(request.request_id)
@@ -346,6 +444,7 @@ class PipelineOrchestrator:
         except QueueFullError as e:
             yield {
                 "event": "error",
+                "request_id": request.request_id,
                 "status": 429,
                 "error": str(e),
                 "total_ms": total_timer.mark_complete()
@@ -354,6 +453,7 @@ class PipelineOrchestrator:
         except QueueTimeoutError as e:
             yield {
                 "event": "error",
+                "request_id": request.request_id,
                 "status": 504,
                 "error": str(e),
                 "total_ms": total_timer.mark_complete()
@@ -369,8 +469,59 @@ class PipelineOrchestrator:
                     "The topic is outside the scope of the ingested research papers."
                 )
                 yield {"event": "token", "content": refusal_msg, "first_token_ms": queue_wait_ms + 10.0}
-                yield {"event": "done", "total_ms": total_timer.mark_complete(), "citations": [], "verified": True}
+                yield {
+                    "event": "done",
+                    "request_id": request.request_id,
+                    "total_ms": total_timer.mark_complete(),
+                    "queue_wait_ms": queue_wait_ms,
+                    "citations": [],
+                    "citation_validation": "refusal",
+                    "verified": True,
+                    "answer_quality": "not_evaluated",
+                    "model": model_name,
+                    "provider": provider_name,
+                    "source": request.source.value,
+                    "tokens_in": 15,
+                    "tokens_out": 25,
+                    "retries": 0,
+                    "status": "refusal"
+                }
                 return
+
+            # Scope Mismatch Check
+            if request.target_papers and "all" not in request.target_papers:
+                if query_plan.target_papers and not any(p in request.target_papers for p in query_plan.target_papers):
+                    paper_titles = {
+                        "1706.03762v7": "Attention Is All You Need",
+                        "2410.00037v1": "Moshi",
+                        "2507.07955v2": "Dynamic Chunking"
+                    }
+                    detected = [paper_titles.get(p, p) for p in query_plan.target_papers]
+                    locked = [paper_titles.get(p, p) for p in request.target_papers]
+                    refusal_msg = (
+                        f"REFUSAL: The question targets topics from {', '.join(detected)}, "
+                        f"but the retrieval scope is strictly locked to {', '.join(locked)}. "
+                        f"The selected paper does not establish the answer."
+                    )
+                    yield {"event": "token", "content": refusal_msg, "first_token_ms": queue_wait_ms + 10.0}
+                    yield {
+                        "event": "done",
+                        "request_id": request.request_id,
+                        "total_ms": total_timer.mark_complete(),
+                        "queue_wait_ms": queue_wait_ms,
+                        "citations": [],
+                        "citation_validation": "refusal",
+                        "verified": True,
+                        "answer_quality": "not_evaluated",
+                        "model": model_name,
+                        "provider": provider_name,
+                        "source": request.source.value,
+                        "tokens_in": max(10, len(request.question) // 4),
+                        "tokens_out": 25,
+                        "retries": 0,
+                        "status": "refusal"
+                    }
+                    return
 
             # Retrieval tool
             retrieval_result = self.retriever.retrieve(
@@ -404,15 +555,20 @@ class PipelineOrchestrator:
                 yield {"event": "token", "content": refusal_msg, "first_token_ms": queue_wait_ms + 15.0}
                 yield {
                     "event": "done",
+                    "request_id": request.request_id,
                     "total_ms": total_timer.mark_complete(),
+                    "queue_wait_ms": queue_wait_ms,
                     "citations": [],
+                    "citation_validation": "refusal",
                     "verified": True,
-                    "model": getattr(self.provider, "model", "stand-in-calibrated"),
+                    "answer_quality": "not_evaluated",
+                    "model": model_name,
+                    "provider": provider_name,
                     "source": request.source.value,
                     "tokens_in": max(10, len(request.question) // 4),
                     "tokens_out": 25,
                     "retries": 0,
-                    "queue_wait_ms": queue_wait_ms
+                    "status": "refusal"
                 }
                 return
 
@@ -421,32 +577,61 @@ class PipelineOrchestrator:
             first_token_ms = None
             accumulated_tokens = []
 
-            # Stream from provider
-            async for token_chunk in self.provider.stream_generate(user_prompt, system_prompt=SYSTEM_PROMPT):
-                if first_token_ms is None:
-                    first_token_ms = queue_wait_ms + total_timer.elapsed_ms
-                accumulated_tokens.append(token_chunk)
-                yield {
-                    "event": "token",
-                    "content": token_chunk,
-                    "first_token_ms": first_token_ms
-                }
+            # Stream from provider following identical answer-generation contract
+            if isinstance(self.provider, StandInProvider):
+                standin_text = AnswerGenerator.build_standin_answer(request.question, chunks, is_refusal=False)
+                async for token_chunk in self.provider.stream_text(standin_text):
+                    if first_token_ms is None:
+                        first_token_ms = queue_wait_ms + total_timer.elapsed_ms
+                    accumulated_tokens.append(token_chunk)
+                    yield {
+                        "event": "token",
+                        "content": token_chunk,
+                        "first_token_ms": first_token_ms
+                    }
+                full_answer = "".join(accumulated_tokens)
+            else:
+                try:
+                    async for token_chunk in self.provider.stream_generate(user_prompt, system_prompt=SYSTEM_PROMPT):
+                        if first_token_ms is None:
+                            first_token_ms = queue_wait_ms + total_timer.elapsed_ms
+                        accumulated_tokens.append(token_chunk)
+                        yield {
+                            "event": "token",
+                            "content": token_chunk,
+                            "first_token_ms": first_token_ms
+                        }
+                    full_answer = "".join(accumulated_tokens)
+                except Exception as ex:
+                    yield {
+                        "event": "error",
+                        "request_id": request.request_id,
+                        "status": 500,
+                        "error": f"Groq streaming failure: {str(ex)}",
+                        "total_ms": total_timer.mark_complete()
+                    }
+                    return
 
-            full_answer = "".join(accumulated_tokens)
-            is_grounded, citations, _, _ = self.verifier.verify_grounding(full_answer, chunks)
+            # Response verification & citations
+            is_grounded, citations, is_refusal, audit_note = self.verifier.verify_grounding(full_answer, chunks)
 
             yield {
                 "event": "done",
+                "request_id": request.request_id,
                 "first_token_ms": first_token_ms,
                 "total_ms": total_timer.mark_complete(),
+                "queue_wait_ms": queue_wait_ms,
                 "citations": [c.model_dump() for c in citations],
+                "citation_validation": "passed" if is_grounded else ("refusal" if is_refusal else "failed"),
                 "verified": is_grounded,
-                "model": getattr(self.provider, "model", "stand-in-calibrated"),
+                "answer_quality": "not_evaluated",
+                "model": model_name,
+                "provider": provider_name,
                 "source": request.source.value,
                 "tokens_in": max(10, len(user_prompt) // 4),
                 "tokens_out": max(10, len(full_answer) // 4),
                 "retries": 0,
-                "queue_wait_ms": queue_wait_ms
+                "status": "ok" if (is_grounded or is_refusal) else "unverified"
             }
 
         finally:

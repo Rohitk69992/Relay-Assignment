@@ -66,8 +66,8 @@ class ResearchRetriever:
         
         # If paper scope is restricted, filter candidates strictly to target_papers
         valid_papers = set(target_papers) if (target_papers and "all" not in target_papers) else None
-        fetch_k = (cfg.top_k * 4) if cfg.rerank else (cfg.top_k * 2)
-        raw_candidates = index.search(query, top_k=min(len(index.chunks), max(fetch_k, 50)))
+        fetch_k = max(cfg.top_k * 10, 60) if cfg.rerank else (cfg.top_k * 2)
+        raw_candidates = index.search(query, top_k=min(len(index.chunks), max(fetch_k, 60)))
 
         if valid_papers:
             candidates = [c for c in raw_candidates if c[0].paper_id in valid_papers][:fetch_k]

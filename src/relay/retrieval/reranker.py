@@ -58,4 +58,38 @@ class CrossScoringReranker:
             reranked.append((chunk, final_score))
 
         reranked.sort(key=lambda x: x[1], reverse=True)
+
+        # Multi-Paper Diversity for Comparative Queries
+        paper_keywords = {
+            "1706.03762v7": ["transformer", "vaswani", "attention is all you need"],
+            "2410.00037v1": ["moshi", "mimi", "helium"],
+            "2507.07955v2": ["dynamic chunking", "boundary predictor", "h-net"]
+        }
+        mentioned_papers = [pid for pid, kws in paper_keywords.items() if any(k in query_lower for k in kws)]
+        is_comparative = any(w in query_lower for w in ["compare", "comparison", "difference", "versus", "vs", "between", "both"])
+
+        if (is_comparative or len(mentioned_papers) > 1) and len(candidates) > top_k:
+            target_set = set(mentioned_papers) if mentioned_papers else {c.paper_id for c, _ in candidates}
+            selected_by_paper: dict = {pid: [] for pid in target_set}
+
+            for chunk, score in reranked:
+                if chunk.paper_id in selected_by_paper:
+                    selected_by_paper[chunk.paper_id].append((chunk, score))
+
+            # Interleave top candidates across target papers
+            diversified: List[Tuple[DocumentChunk, float]] = []
+            per_paper_quota = max(1, top_k // len(target_set))
+
+            for pid, p_candidates in selected_by_paper.items():
+                diversified.extend(p_candidates[:per_paper_quota])
+
+            # Fill remaining slots up to top_k from overall highest scoring
+            for item in reranked:
+                if len(diversified) >= top_k:
+                    break
+                if item not in diversified:
+                    diversified.append(item)
+
+            return diversified[:top_k]
+
         return reranked[:top_k]
