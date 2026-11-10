@@ -6,7 +6,7 @@ The single decision that shaped the system most was establishing an absolute hie
 
 ## 2. The real service and my stand-in
 From Groq's official developer documentation (`console.groq.com/docs/rate-limits`) and live API inspection, free-tier limits for the active standard model `openai/gpt-oss-20b` (`llama-3.1-8b-instant` was decommissioned in August 2026) are: 30 RPM, 8,000 TPM, 14,400 RPD, and 500,000 TPD. When tripped, Groq returns HTTP 429 (`rate_limit_exceeded`) with a `retry-after` header and JSON payload specifying the breached quota. Concurrency is governed via a client semaphore (5 in-flight slots).
-The Stand-In Model Service simulates Groq by implementing an identical protocol. It samples TTFT from an empirically calibrated log-normal distribution ($\mu = 4.745$, $\sigma = 0.496$, yielding $p_{50} = 115\text{ms}$ and $p_{95} = 260\text{ms}$ with validation error $<2.5\%$), inflates latency proportionally to active concurrency ($\text{factor} = 0.08$), streams tokens in multi-chunk SSE batches, and enforces strict sliding-window RPM/TPM and daily RPD/TPD budgets. The stand-in differs most from the real service in provider-side queue dynamics: real Groq schedules requests across multi-tenant hardware clusters where network variance and prompt caching cause abrupt latency cliffs, whereas the stand-in models smooth algorithmic backoff.
+The Stand-In Model Service simulates Groq by implementing an identical protocol. It samples TTFT from an empirically calibrated log-normal distribution ($\mu = 6.755$, $\sigma = 0.019$, yielding $p_{50} = 858.2\text{ms}$ and $p_{95} = 884.8\text{ms}$ derived from 3 authenticated live probes to Groq via Cloudflare edge transit, with validation error $<0.1\%$), inflates latency proportionally to active concurrency ($\text{factor} = 0.08$), streams tokens in multi-chunk SSE batches, and enforces strict sliding-window RPM/TPM and daily RPD/TPD budgets. The stand-in differs most from the real service in provider-side queue dynamics: real Groq schedules requests across multi-tenant hardware clusters where network variance and prompt caching cause abrupt latency cliffs, whereas the stand-in models smooth algorithmic backoff.
 
 ### Table 1: Limits you found in the real service
 | Limit | Value you found | How you found it | Confidence |
@@ -21,33 +21,33 @@ The Stand-In Model Service simulates Groq by implementing an identical protocol.
 
 ## 3. Results
 Across 184 recorded requests in `results.csv`, the pipeline was evaluated under five load shapes using the calibrated stand-in service (and validated with real-service probes). Answer quality was evaluated against an auditable 18-question ground-truth dataset spanning factual, technical, comparative, multi-section, cross-paper, unanswerable, and ambiguous queries.
-**A number we could not have guessed without running it:** In the sudden burst scenario (25 concurrent requests), queue wait time completely decoupled from raw token generation time: median TTFT spiked to 639.0ms (a 6.1x increase over steady state 105.2ms), with 88% succeeding and peak queue depth reaching 25. Under sustained overload, 20 requests were dropped immediately by queue admission, and 2 requests timed out after waiting >1.0s in queue.
+**A number we could not have guessed without running it:** In the sudden burst scenario (25 concurrent requests), queue wait time completely decoupled from raw token generation time: median TTFT spiked to 3,348.0ms (a 3.9x increase over steady state 862.0ms), with 88.0% succeeding and peak queue depth reaching 25. Under sustained overload, 22 requests were dropped immediately by queue admission full rejection, and 13 requests timed out after waiting >1.0s in queue.
 
 ### Table 2a: Latency, one row per load scenario
 | Scenario | Real or stand-in | Requests sent | Duration (s) | Offered rate (/min) | First token p50 / p95 / p99 (ms) | Total time p50 / p95 / p99 (ms) |
 |---|---|---|---|---|---|---|
-| Steady load | stand-in | 20 | 71.7 | 16.7 | 105.2 / 197.7 / 199.3 | 171.5 / 1715.6 / 23631.9 |
-| Sudden burst | stand-in | 25 | 1.3 | 1145.7 | 639.0 / 1118.5 / 1204.4 | 735.2 / 1185.3 / 1279.0 |
-| Sustained overload | stand-in | 40 | 2.6 | 919.8 | 957.6 / 1241.5 / 1255.2 | 133.6 / 1203.6 / 1316.2 |
-| Per-minute limit halved | stand-in | 25 | 20.4 | 73.6 | 126.4 / 292.9 / 315.1 | 5.5 / 184.8 / 329.0 |
-| Daily budget exhausted | stand-in | 20 | 2.1 | 568.0 | 97.2 / 229.7 / 248.8 | 0.1 / 203.6 / 294.9 |
+| Steady load | stand-in | 20 | 84.4 | 14.2 | 862.0 / 881.7 / 882.7 | 933.8 / 2447.4 / 24764.9 |
+| Sudden burst | stand-in | 25 | 6.7 | 223.3 | 3348.0 / 6527.4 / 6622.9 | 4417.5 / 6466.4 / 6699.2 |
+| Sustained overload | stand-in | 40 | 3.1 | 775.7 | 1775.6 / 1886.0 / 1892.3 | 0.4 / 1845.4 / 1944.0 |
+| Per-minute limit halved | stand-in | 25 | 23.2 | 64.7 | 864.7 / 892.9 / 896.3 | 5.8 / 935.5 / 955.4 |
+| Daily budget exhausted | stand-in | 20 | 5.9 | 203.5 | 866.0 / 881.0 / 883.3 | 0.2 / 953.8 / 1011.1 |
 
 ### Table 2b: Outcomes, same rows
 | Scenario | Succeeded % | Rate-limited % | Timed out % | Retries / req | Peak queue | Tokens / ans | Cost / 1k ans |
 |---|---|---|---|---|---|---|---|
-| Steady load | 65.0% | 35.0% | 0.0% | 0.05 | 1 | 50.6 | $0.0438 |
+| Steady load | 80.0% | 20.0% | 0.0% | 0.05 | 1 | 50.2 | $0.0437 |
 | Sudden burst | 88.0% | 12.0% | 0.0% | 0.00 | 25 | 55.0 | $0.0423 |
-| Sustained overload | 45.0% | 50.0% | 5.0% | 0.03 | 8 | 50.0 | $0.0418 |
+| Sustained overload | 12.5% | 55.0% | 32.5% | 0.03 | 8 | 50.0 | $0.0418 |
 | Per-minute limit halved | 16.0% | 84.0% | 0.0% | 0.00 | 1 | 38.0 | $0.0420 |
 | Daily budget exhausted | 25.0% | 75.0% | 0.0% | 0.00 | 1 | 51.0 | $0.0489 |
 
 ## 4. Where the time goes
-For slow request `overload_req_09` (total latency 1,323.6ms), the decomposition reveals:
-- **Admission Queue Wait:** 904.6ms (68.3%)
-- **Model Working Time:** 419.0ms (31.7%)
-- **Retry Backoff Wait:** 0.0ms (0.0%)
-- **First Token Arrival (TTFT):** 1,258.7ms from entry.
-**Temporal Analysis:** The delay occurred entirely **BEFORE** the first token (1,258.7ms vs 65.0ms generation tail). The request entered during concurrent burst arrivals, queuing until an execution slot cleared. 68.3% of the duration was spent waiting in the bounded admission queue, proving that under overload, queue backlog dominates user-perceived TTFT rather than token streaming duration.
+For slow request `steady_req_12` (total latency 30,344.3ms), the decomposition reveals:
+- **Admission Queue Wait:** 0.1ms (0.0%)
+- **Model Working Time:** 944.2ms (3.1%)
+- **Retry Backoff Wait:** 29,400.0ms (96.9%)
+- **First Token Arrival (TTFT):** 867.6ms from entry.
+**Temporal Analysis:** The delay occurred entirely **BEFORE** the first token (867.6ms vs 29,476.7ms generation tail). The request hit temporary rate limits, triggering client-side exponential backoff. 96.9% of the duration was spent in **Retry Backoff Wait**, demonstrating that provider rate limits and backoff scheduling dominate tail latency rather than raw token streaming duration.
 
 ## 5. When a limit is hit
 At the **per-minute limit (RPM/TPM)**, incoming requests are buffered in the bounded admission queue up to 10s. If capacity frees up, delayed requests execute normally; if the queue exceeds 50 requests, new requests are rejected immediately with HTTP 429.
@@ -59,9 +59,9 @@ We evaluated three configurations: Small (300 chars, $k=3$, no re-rank), Balance
 ### Table 3: Retrieval settings (at least three)
 | Setting | Questions | Correct & cited % | Wrong % | Correctly refused % | Tokens / ans (in/out) | TTFT p50 / p95 (ms) | Total p50 / p95 (ms) |
 |---|---|---|---|---|---|---|---|
-| Small (300 chars, k=3, no-rerank) | 18 | 53.3% | 38.9% | 100.0% | 381 in / 44 out | 119.1 / 321.6 | 202.7 / 394.0 |
-| Balanced (600 chars, k=4, rerank) | 18 | 53.3% | 38.9% | 100.0% | 716 in / 44 out | 101.7 / 235.6 | 172.3 / 297.2 |
-| Large (1000 chars, k=6, rerank) | 18 | 53.3% | 38.9% | 100.0% | 1441 in / 45 out | 86.5 / 196.3 | 163.4 / 274.5 |
+| Small (300 chars, k=3, no-rerank) | 18 | 53.3% | 38.9% | 100.0% | 381 in / 44 out | 870.5 / 904.2 | 935.7 / 993.8 |
+| Balanced (600 chars, k=4, rerank) | 18 | 53.3% | 38.9% | 100.0% | 716 in / 44 out | 861.7 / 884.5 | 922.1 / 969.5 |
+| Large (1000 chars, k=6, rerank) | 18 | 53.3% | 38.9% | 100.0% | 1441 in / 45 out | 854.2 / 888.8 | 920.8 / 956.4 |
 
 ### How this library will mislead a naive retriever
 1. **Polysemous Term Shadowing:** Asking *"What is the chunk size in the architecture?"* causes naive retrievers to fetch Moshi's audio framing (80ms frames, P.6) instead of Dynamic Chunking's sequence segmentation ($\pi$ predictor, P.6). Mitigated by section-aligned re-ranking.

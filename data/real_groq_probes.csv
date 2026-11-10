@@ -1,7 +1,4 @@
 probe_id,timestamp_utc,target_url,model,http_status,ttft_ms,total_ms,tokens_in,tokens_out,authenticated,response_snippet
-real_groq_probe_01,2026-11-10T13:23:25.358154+00:00,https://api.groq.com/openai/v1/chat/completions,openai/gpt-oss-20b,401,,1244.6,0,0,False,"{""error"":{""message"":""Invalid API Key"",""type"":""invalid_request_error"",""code"":""invalid_api_key""}}
-"
-real_groq_probe_02,2026-11-10T13:23:27.607882+00:00,https://api.groq.com/openai/v1/chat/completions,openai/gpt-oss-20b,401,,333.7,0,0,False,"{""error"":{""message"":""Invalid API Key"",""type"":""invalid_request_error"",""code"":""invalid_api_key""}}
-"
-real_groq_probe_03,2026-11-10T13:23:28.951805+00:00,https://api.groq.com/openai/v1/chat/completions,openai/gpt-oss-20b,401,,386.3,0,0,False,"{""error"":{""message"":""Invalid API Key"",""type"":""invalid_request_error"",""code"":""invalid_api_key""}}
-"
+real_groq_probe_01,2026-11-10T13:53:39.586331+00:00,https://api.groq.com/openai/v1/chat/completions,openai/gpt-oss-20b,200,884.8,988.4,98,90,True,"The user asks: ""State the number of attention heads in the base Transformer from Attention Is All You Need."" The base Tr"
+real_groq_probe_02,2026-11-10T13:53:41.586656+00:00,https://api.groq.com/openai/v1/chat/completions,openai/gpt-oss-20b,200,774.6,949.5,96,150,True,"We need to answer: ""What is the framerate of the Mimi neural audio codec in Moshi?"" This seems like a specific technical"
+real_groq_probe_03,2026-11-10T13:53:43.543803+00:00,https://api.groq.com/openai/v1/chat/completions,openai/gpt-oss-20b,200,858.1,1018.8,92,150,True,We need to explain what predicts boundaries between chunks in Dynamic Chunking. Likely referring to a computational mode

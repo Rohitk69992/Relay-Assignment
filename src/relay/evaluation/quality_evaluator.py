@@ -1,18 +1,30 @@
 """Independent evaluation harness for assessing answer quality against ground truth."""
 
-from typing import Optional, Tuple
+import re
+from typing import Optional, Set, Tuple
 from src.relay.pipeline.verifier import ResponseVerifier
-from src.relay.schemas import AnswerGrade, EvaluationItem, PipelineResponse, RequestStatus
+from src.relay.schemas import AnswerGrade, EvaluationItem, PipelineResponse, RequestStatus, SourceType
 
 
 class QualityEvaluator:
     """Evaluates pipeline responses against ground truth evaluation items.
     
     Operates strictly outside the application runtime to guarantee zero evaluation leakage.
+    Distinguishes retrieval verification from real-model generative correctness.
     """
 
     def __init__(self):
         self.verifier = ResponseVerifier()
+
+    def _extract_keywords(self, text: str) -> Set[str]:
+        """Extracts substantive content keywords (lowercased, len >= 4)."""
+        stop_words = {
+            "what", "which", "where", "when", "that", "this", "from", "with",
+            "have", "more", "used", "uses", "into", "than", "were", "been",
+            "their", "also", "each", "both", "such", "then", "them"
+        }
+        words = re.findall(r'\b[a-zA-Z0-9_\-\.\/]{3,}\b', text.lower())
+        return {w for w in words if w not in stop_words and not w.isdigit()}
 
     def grade(
         self,
@@ -53,8 +65,22 @@ class QualityEvaluator:
             for c in citations
         )
 
-        if target_match:
-            return AnswerGrade.CORRECT, f"Target citation matched {item.expected_paper} Page {item.expected_page}."
-        else:
+        if not target_match:
             cited_desc = ", ".join(f"{c.paper_id} P.{c.page}" for c in citations)
             return AnswerGrade.WRONG, f"Citations ({cited_desc}) did not match expected ground truth ({item.expected_paper} P.{item.expected_page})."
+
+        # Check semantic alignment if response is from a live model
+        if response.source == SourceType.REAL and item.expected_answer:
+            exp_kw = self._extract_keywords(item.expected_answer)
+            ans_kw = self._extract_keywords(response.answer)
+            overlap = exp_kw.intersection(ans_kw)
+            if not overlap and len(exp_kw) > 0:
+                return AnswerGrade.WRONG, f"Citation matched {item.expected_paper} P.{item.expected_page}, but answer lacked required factual content."
+
+        # Stand-in retrieval audit or confirmed factual match
+        if response.source == SourceType.STANDIN:
+            rationale = f"Retrieval verified: target passage matched ground truth [{item.expected_paper} P.{item.expected_page}]."
+        else:
+            rationale = f"Factual answer and citation verified against [{item.expected_paper} P.{item.expected_page}]."
+
+        return AnswerGrade.CORRECT, rationale

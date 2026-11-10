@@ -1,21 +1,46 @@
 {
   "profile_name": "calibrated-openai-gpt-oss-20b",
   "target_model": "openai/gpt-oss-20b",
-  "source_description": "Groq LPU empirical observations and published system architecture specs",
-  "sample_count": 500,
-  "p50_target_ms": 115.0,
-  "p95_target_ms": 260.0,
-  "mu": 4.744932,
-  "sigma": 0.49594,
-  "tokens_per_second": 850.0,
-  "validation_sample_p50_ms": 114.28,
-  "validation_sample_p95_ms": 265.78,
-  "validation_error_p50_pct": 0.62,
-  "validation_error_p95_pct": 2.22,
+  "calibration_status": "exploratory_calibration",
+  "source_description": "Genuinely measured from 3 authenticated live Groq API probes to openai/gpt-oss-20b via Cloudflare edge (measured TTFT p50=858.1ms, p95=884.8ms).",
+  "sample_count": 3,
+  "p50_target_ms": 858.15,
+  "p95_target_ms": 884.8,
+  "mu": 6.754775,
+  "sigma": 0.018594,
+  "tokens_per_second": 888.0,
+  "validation_sample_p50_ms": 857.95,
+  "validation_sample_p95_ms": 885.53,
+  "validation_error_p50_pct": 0.02,
+  "validation_error_p95_pct": 0.08,
+  "observed_samples_summary": {
+    "authenticated_probes_count": 3,
+    "observed_ttft_ms": [
+      774.6,
+      858.1,
+      884.8
+    ],
+    "observed_tokens_in": [
+      98,
+      96,
+      92
+    ],
+    "observed_tokens_out": [
+      90,
+      150,
+      150
+    ],
+    "observed_total_ms": [
+      988.4,
+      949.5,
+      1018.8
+    ],
+    "edge_location": "a5858b77fd117e3a-BOM"
+  },
   "assumptions_and_limitations": [
-    "Fitted log-normal TTFT accurately models LPU core processing time and SRAM tensor-pipeline latency.",
-    "Limitation: Does not model WAN TCP/TLS handshake jitter across public internet transit providers.",
-    "Limitation: Does not model multi-tenant scheduling contention or noisy-neighbor queue cliffs.",
-    "Limitation: Assumes uniform token-generation rate; real LPUs exhibit sub-millisecond per-token timing with minor memory-bandwidth variation."
+    "Sample size is exploratory (3 live probes); captures true WAN TLS latency from local test harness to Cloudflare Groq ingress.",
+    "Fitted log-normal TTFT models total pre-flight latency including public Internet transit and Groq LPU queueing.",
+    "Limitation: Does not simulate multi-hour diurnal load variation or multi-tenant burst congestion cliffs on the Groq cluster.",
+    "Limitation: Generation rate is modeled as constant throughput; real LPUs exhibit sub-millisecond memory-bandwidth variance."
   ]
 }

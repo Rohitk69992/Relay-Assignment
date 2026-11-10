@@ -1,185 +1,185 @@
 request_id,scenario,source,start_time,first_token_ms,total_ms,status,retries,tokens_in,tokens_out,retrieval_setting,answer_grade,queue_wait_ms,processing_ms,retry_wait_ms,model,error_type
-retrieval_cs300_k3_no-rerank_q01,retrieval_cs300_k3_no-rerank,stand-in,2026-11-10T13:34:09.317518+00:00,130.1,235.9,ok,0,429,44,cs300_k3_no-rerank,correct,0.2,235.7,0.0,stand-in-calibrated,
-retrieval_cs300_k3_no-rerank_q02,retrieval_cs300_k3_no-rerank,stand-in,2026-11-10T13:34:09.553227+00:00,90.6,156.8,ok,0,427,44,cs300_k3_no-rerank,correct,0.1,156.7,0.0,stand-in-calibrated,
-retrieval_cs300_k3_no-rerank_q03,retrieval_cs300_k3_no-rerank,stand-in,2026-11-10T13:34:09.710131+00:00,224.8,301.1,ok,0,425,50,cs300_k3_no-rerank,wrong,0.1,300.9,0.0,stand-in-calibrated,
-retrieval_cs300_k3_no-rerank_q04,retrieval_cs300_k3_no-rerank,stand-in,2026-11-10T13:34:10.011646+00:00,108.1,178.4,ok,0,428,48,cs300_k3_no-rerank,correct,0.1,178.3,0.0,stand-in-calibrated,
-retrieval_cs300_k3_no-rerank_q05,retrieval_cs300_k3_no-rerank,stand-in,2026-11-10T13:34:10.189864+00:00,72.7,139.4,ok,0,437,51,cs300_k3_no-rerank,correct,0.1,139.3,0.0,stand-in-calibrated,
-retrieval_cs300_k3_no-rerank_q06,retrieval_cs300_k3_no-rerank,stand-in,2026-11-10T13:34:10.329619+00:00,153.2,227.0,ok,0,429,50,cs300_k3_no-rerank,wrong,0.1,226.9,0.0,stand-in-calibrated,
-retrieval_cs300_k3_no-rerank_q07,retrieval_cs300_k3_no-rerank,stand-in,2026-11-10T13:34:10.556725+00:00,72.8,140.8,ok,0,447,51,cs300_k3_no-rerank,correct,0.1,140.7,0.0,stand-in-calibrated,
-retrieval_cs300_k3_no-rerank_q08,retrieval_cs300_k3_no-rerank,stand-in,2026-11-10T13:34:10.697623+00:00,272.8,356.2,ok,0,437,57,cs300_k3_no-rerank,wrong,0.1,356.1,0.0,stand-in-calibrated,
-retrieval_cs300_k3_no-rerank_q09,retrieval_cs300_k3_no-rerank,stand-in,2026-11-10T13:34:11.053887+00:00,97.5,166.1,ok,0,507,48,cs300_k3_no-rerank,wrong,0.1,166.1,0.0,stand-in-calibrated,
-retrieval_cs300_k3_no-rerank_q10,retrieval_cs300_k3_no-rerank,stand-in,2026-11-10T13:34:11.220320+00:00,212.2,280.0,ok,0,439,43,cs300_k3_no-rerank,wrong,0.1,279.9,0.0,stand-in-calibrated,
-retrieval_cs300_k3_no-rerank_q11,retrieval_cs300_k3_no-rerank,stand-in,2026-11-10T13:34:11.500203+00:00,255.2,329.1,ok,0,532,44,cs300_k3_no-rerank,correct,0.1,329.0,0.0,stand-in-calibrated,
-retrieval_cs300_k3_no-rerank_q12,retrieval_cs300_k3_no-rerank,stand-in,2026-11-10T13:34:11.829600+00:00,313.6,383.8,ok,0,467,51,cs300_k3_no-rerank,wrong,0.1,383.7,0.0,stand-in-calibrated,
-retrieval_cs300_k3_no-rerank_q13,retrieval_cs300_k3_no-rerank,stand-in,2026-11-10T13:34:12.213502+00:00,10.1,0.2,ok,0,15,25,cs300_k3_no-rerank,refused_correctly,0.1,0.1,0.0,stand-in-calibrated,
-retrieval_cs300_k3_no-rerank_q14,retrieval_cs300_k3_no-rerank,stand-in,2026-11-10T13:34:12.213502+00:00,10.1,0.1,ok,0,15,25,cs300_k3_no-rerank,refused_correctly,0.1,0.0,0.0,stand-in-calibrated,
-retrieval_cs300_k3_no-rerank_q15,retrieval_cs300_k3_no-rerank,stand-in,2026-11-10T13:34:12.213502+00:00,10.0,0.1,ok,0,15,25,cs300_k3_no-rerank,refused_correctly,0.0,0.0,0.0,stand-in-calibrated,
-retrieval_cs300_k3_no-rerank_q16,retrieval_cs300_k3_no-rerank,stand-in,2026-11-10T13:34:12.213502+00:00,366.8,452.0,ok,0,465,56,cs300_k3_no-rerank,wrong,0.0,452.0,0.0,stand-in-calibrated,
-retrieval_cs300_k3_no-rerank_q17,retrieval_cs300_k3_no-rerank,stand-in,2026-11-10T13:34:12.666596+00:00,102.7,172.2,ok,0,512,48,cs300_k3_no-rerank,correct,0.1,172.0,0.0,stand-in-calibrated,
-retrieval_cs300_k3_no-rerank_q18,retrieval_cs300_k3_no-rerank,stand-in,2026-11-10T13:34:12.838419+00:00,239.8,297.1,ok,0,424,38,cs300_k3_no-rerank,correct,0.1,297.0,0.0,stand-in-calibrated,
-retrieval_cs600_k4_rerank_q01,retrieval_cs600_k4_rerank,stand-in,2026-11-10T13:34:13.135707+00:00,249.3,349.8,ok,0,764,44,cs600_k4_rerank,correct,0.1,349.7,0.0,stand-in-calibrated,
-retrieval_cs600_k4_rerank_q02,retrieval_cs600_k4_rerank,stand-in,2026-11-10T13:34:13.485943+00:00,140.3,201.1,ok,0,784,47,cs600_k4_rerank,correct,0.1,201.1,0.0,stand-in-calibrated,
-retrieval_cs600_k4_rerank_q03,retrieval_cs600_k4_rerank,stand-in,2026-11-10T13:34:13.687439+00:00,90.8,148.3,ok,0,853,39,cs600_k4_rerank,wrong,0.1,148.2,0.0,stand-in-calibrated,
-retrieval_cs600_k4_rerank_q04,retrieval_cs600_k4_rerank,stand-in,2026-11-10T13:34:13.835569+00:00,74.6,157.5,ok,0,820,55,cs600_k4_rerank,wrong,0.3,157.2,0.0,stand-in-calibrated,
-retrieval_cs600_k4_rerank_q05,retrieval_cs600_k4_rerank,stand-in,2026-11-10T13:34:13.993366+00:00,73.6,147.9,ok,0,927,51,cs600_k4_rerank,correct,0.1,147.8,0.0,stand-in-calibrated,
-retrieval_cs600_k4_rerank_q06,retrieval_cs600_k4_rerank,stand-in,2026-11-10T13:34:14.141517+00:00,148.7,218.9,ok,0,807,50,cs600_k4_rerank,wrong,0.1,218.8,0.0,stand-in-calibrated,
-retrieval_cs600_k4_rerank_q07,retrieval_cs600_k4_rerank,stand-in,2026-11-10T13:34:14.360692+00:00,106.3,185.7,ok,0,865,51,cs600_k4_rerank,correct,0.1,185.6,0.0,stand-in-calibrated,
-retrieval_cs600_k4_rerank_q08,retrieval_cs600_k4_rerank,stand-in,2026-11-10T13:34:14.546479+00:00,163.6,249.7,ok,0,793,57,cs600_k4_rerank,wrong,0.1,249.6,0.0,stand-in-calibrated,
-retrieval_cs600_k4_rerank_q09,retrieval_cs600_k4_rerank,stand-in,2026-11-10T13:34:14.796158+00:00,56.1,125.3,ok,0,884,50,cs600_k4_rerank,correct,0.1,125.2,0.0,stand-in-calibrated,
-retrieval_cs600_k4_rerank_q10,retrieval_cs600_k4_rerank,stand-in,2026-11-10T13:34:14.921629+00:00,72.6,137.8,ok,0,865,47,cs600_k4_rerank,wrong,0.1,137.7,0.0,stand-in-calibrated,
-retrieval_cs600_k4_rerank_q11,retrieval_cs600_k4_rerank,stand-in,2026-11-10T13:34:15.059331+00:00,143.1,212.8,ok,0,942,44,cs600_k4_rerank,correct,0.1,212.7,0.0,stand-in-calibrated,
-retrieval_cs600_k4_rerank_q12,retrieval_cs600_k4_rerank,stand-in,2026-11-10T13:34:15.272602+00:00,97.1,158.8,ok,0,864,47,cs600_k4_rerank,wrong,0.1,158.7,0.0,stand-in-calibrated,
-retrieval_cs600_k4_rerank_q13,retrieval_cs600_k4_rerank,stand-in,2026-11-10T13:34:15.431740+00:00,10.1,0.2,ok,0,15,25,cs600_k4_rerank,refused_correctly,0.1,0.1,0.0,stand-in-calibrated,
-retrieval_cs600_k4_rerank_q14,retrieval_cs600_k4_rerank,stand-in,2026-11-10T13:34:15.431740+00:00,10.1,0.1,ok,0,15,25,cs600_k4_rerank,refused_correctly,0.1,0.0,0.0,stand-in-calibrated,
-retrieval_cs600_k4_rerank_q15,retrieval_cs600_k4_rerank,stand-in,2026-11-10T13:34:15.431740+00:00,10.0,0.1,ok,0,15,25,cs600_k4_rerank,refused_correctly,0.0,0.0,0.0,stand-in-calibrated,
-retrieval_cs600_k4_rerank_q16,retrieval_cs600_k4_rerank,stand-in,2026-11-10T13:34:15.431740+00:00,198.4,280.4,ok,0,901,56,cs600_k4_rerank,wrong,0.0,280.4,0.0,stand-in-calibrated,
-retrieval_cs600_k4_rerank_q17,retrieval_cs600_k4_rerank,stand-in,2026-11-10T13:34:15.712711+00:00,157.1,222.1,ok,0,948,48,cs600_k4_rerank,correct,0.1,222.0,0.0,stand-in-calibrated,
-retrieval_cs600_k4_rerank_q18,retrieval_cs600_k4_rerank,stand-in,2026-11-10T13:34:15.935103+00:00,233.2,287.9,ok,0,824,38,cs600_k4_rerank,correct,0.1,287.8,0.0,stand-in-calibrated,
-retrieval_cs1000_k6_rerank_q01,retrieval_cs1000_k6_rerank,stand-in,2026-11-10T13:34:16.222930+00:00,98.1,196.8,ok,0,1573,44,cs1000_k6_rerank,correct,0.1,196.7,0.0,stand-in-calibrated,
-retrieval_cs1000_k6_rerank_q02,retrieval_cs1000_k6_rerank,stand-in,2026-11-10T13:34:16.420237+00:00,129.2,197.7,ok,0,1832,47,cs1000_k6_rerank,correct,0.1,197.7,0.0,stand-in-calibrated,
-retrieval_cs1000_k6_rerank_q03,retrieval_cs1000_k6_rerank,stand-in,2026-11-10T13:34:16.617991+00:00,240.8,292.2,ok,0,1664,39,cs1000_k6_rerank,wrong,0.1,292.1,0.0,stand-in-calibrated,
-retrieval_cs1000_k6_rerank_q04,retrieval_cs1000_k6_rerank,stand-in,2026-11-10T13:34:16.910468+00:00,115.6,197.4,ok,0,1786,55,cs1000_k6_rerank,wrong,0.1,197.3,0.0,stand-in-calibrated,
-retrieval_cs1000_k6_rerank_q05,retrieval_cs1000_k6_rerank,stand-in,2026-11-10T13:34:17.107870+00:00,59.0,123.8,ok,0,1737,51,cs1000_k6_rerank,correct,0.1,123.7,0.0,stand-in-calibrated,
-retrieval_cs1000_k6_rerank_q06,retrieval_cs1000_k6_rerank,stand-in,2026-11-10T13:34:17.231796+00:00,188.5,271.4,ok,0,1687,55,cs1000_k6_rerank,wrong,0.1,271.3,0.0,stand-in-calibrated,
-retrieval_cs1000_k6_rerank_q07,retrieval_cs1000_k6_rerank,stand-in,2026-11-10T13:34:17.502933+00:00,72.3,137.6,ok,0,1705,51,cs1000_k6_rerank,correct,0.2,137.5,0.0,stand-in-calibrated,
-retrieval_cs1000_k6_rerank_q08,retrieval_cs1000_k6_rerank,stand-in,2026-11-10T13:34:17.641128+00:00,167.8,249.4,ok,0,1520,57,cs1000_k6_rerank,wrong,0.1,249.3,0.0,stand-in-calibrated,
-retrieval_cs1000_k6_rerank_q09,retrieval_cs1000_k6_rerank,stand-in,2026-11-10T13:34:17.890758+00:00,73.5,141.5,ok,0,1688,50,cs1000_k6_rerank,correct,0.1,141.4,0.0,stand-in-calibrated,
-retrieval_cs1000_k6_rerank_q10,retrieval_cs1000_k6_rerank,stand-in,2026-11-10T13:34:18.032123+00:00,74.9,141.5,ok,0,1851,50,cs1000_k6_rerank,wrong,0.1,141.4,0.0,stand-in-calibrated,
-retrieval_cs1000_k6_rerank_q11,retrieval_cs1000_k6_rerank,stand-in,2026-11-10T13:34:18.173830+00:00,57.1,125.2,ok,0,1840,44,cs1000_k6_rerank,correct,0.1,125.1,0.0,stand-in-calibrated,
-retrieval_cs1000_k6_rerank_q12,retrieval_cs1000_k6_rerank,stand-in,2026-11-10T13:34:18.299771+00:00,181.3,248.8,ok,0,1755,47,cs1000_k6_rerank,wrong,0.1,248.7,0.0,stand-in-calibrated,
-retrieval_cs1000_k6_rerank_q13,retrieval_cs1000_k6_rerank,stand-in,2026-11-10T13:34:18.548082+00:00,10.1,0.2,ok,0,15,25,cs1000_k6_rerank,refused_correctly,0.1,0.1,0.0,stand-in-calibrated,
-retrieval_cs1000_k6_rerank_q14,retrieval_cs1000_k6_rerank,stand-in,2026-11-10T13:34:18.549121+00:00,10.1,0.1,ok,0,15,25,cs1000_k6_rerank,refused_correctly,0.1,0.1,0.0,stand-in-calibrated,
-retrieval_cs1000_k6_rerank_q15,retrieval_cs1000_k6_rerank,stand-in,2026-11-10T13:34:18.549121+00:00,10.0,0.1,ok,0,15,25,cs1000_k6_rerank,refused_correctly,0.0,0.0,0.0,stand-in-calibrated,
-retrieval_cs1000_k6_rerank_q16,retrieval_cs1000_k6_rerank,stand-in,2026-11-10T13:34:18.549121+00:00,119.4,198.9,ok,0,1716,56,cs1000_k6_rerank,wrong,0.0,198.9,0.0,stand-in-calibrated,
-retrieval_cs1000_k6_rerank_q17,retrieval_cs1000_k6_rerank,stand-in,2026-11-10T13:34:18.748105+00:00,73.4,140.0,ok,0,1839,48,cs1000_k6_rerank,correct,0.1,139.9,0.0,stand-in-calibrated,
-retrieval_cs1000_k6_rerank_q18,retrieval_cs1000_k6_rerank,stand-in,2026-11-10T13:34:18.888049+00:00,132.9,185.2,ok,0,1695,38,cs1000_k6_rerank,correct,0.1,185.1,0.0,stand-in-calibrated,
-steady_req_01,steady,stand-in,2026-11-10T13:34:25.895050+00:00,135.2,249.3,ok,0,735,44,cs600_k4_rerank,,0.1,249.2,0.0,stand-in-calibrated,
-steady_req_02,steady,stand-in,2026-11-10T13:34:28.245956+00:00,107.1,173.1,ok,0,870,46,cs600_k4_rerank,,0.1,173.0,0.0,stand-in-calibrated,
-steady_req_03,steady,stand-in,2026-11-10T13:34:30.522985+00:00,90.4,172.9,ok,0,762,56,cs600_k4_rerank,,0.1,172.8,0.0,stand-in-calibrated,
-steady_req_04,steady,stand-in,2026-11-10T13:34:32.799852+00:00,65.0,136.4,ok,0,808,55,cs600_k4_rerank,,0.1,136.3,0.0,stand-in-calibrated,
-steady_req_05,steady,stand-in,2026-11-10T13:34:35.045154+00:00,87.0,144.0,ok,0,735,44,cs600_k4_rerank,,0.1,143.9,0.0,stand-in-calibrated,
-steady_req_06,steady,stand-in,2026-11-10T13:34:37.296983+00:00,103.8,169.4,ok,0,870,46,cs600_k4_rerank,,0.1,169.2,0.0,stand-in-calibrated,
-steady_req_07,steady,stand-in,2026-11-10T13:34:39.577109+00:00,89.6,170.1,ok,0,762,56,cs600_k4_rerank,,0.2,169.9,0.0,stand-in-calibrated,
-steady_req_08,steady,stand-in,2026-11-10T13:34:41.850245+00:00,119.9,202.6,ok,0,808,55,cs600_k4_rerank,,0.2,202.4,0.0,stand-in-calibrated,
-steady_req_09,steady,stand-in,2026-11-10T13:34:44.156288+00:00,,4.9,rate_limited,0,735,0,cs600_k4_rerank,,0.1,4.8,0.0,stand-in-calibrated,
-steady_req_10,steady,stand-in,2026-11-10T13:34:46.262672+00:00,,4.7,rate_limited,0,870,0,cs600_k4_rerank,,0.1,4.5,0.0,stand-in-calibrated,
-steady_req_11,steady,stand-in,2026-11-10T13:34:48.377997+00:00,,3.8,rate_limited,0,762,0,cs600_k4_rerank,,0.1,3.7,0.0,stand-in-calibrated,
-steady_req_12,steady,stand-in,2026-11-10T13:34:50.482482+00:00,,4.3,rate_limited,0,808,0,cs600_k4_rerank,,0.2,4.1,0.0,stand-in-calibrated,
-steady_req_13,steady,stand-in,2026-11-10T13:34:52.589521+00:00,,4.5,rate_limited,0,735,0,cs600_k4_rerank,,0.1,4.4,0.0,stand-in-calibrated,
-steady_req_14,steady,stand-in,2026-11-10T13:34:54.696425+00:00,,3.3,rate_limited,0,870,0,cs600_k4_rerank,,0.1,3.2,0.0,stand-in-calibrated,
-steady_req_15,steady,stand-in,2026-11-10T13:34:56.798662+00:00,,29111.0,rate_limited,1,762,0,cs600_k4_rerank,,0.1,10.9,29100.0,stand-in-calibrated,
-steady_req_16,steady,stand-in,2026-11-10T13:35:28.017784+00:00,118.2,200.3,ok,0,808,55,cs600_k4_rerank,,0.1,200.2,0.0,stand-in-calibrated,
-steady_req_17,steady,stand-in,2026-11-10T13:35:30.324442+00:00,196.4,262.4,ok,0,735,44,cs600_k4_rerank,,0.2,262.2,0.0,stand-in-calibrated,
-steady_req_18,steady,stand-in,2026-11-10T13:35:32.687076+00:00,199.7,273.7,ok,0,870,46,cs600_k4_rerank,,0.1,273.6,0.0,stand-in-calibrated,
-steady_req_19,steady,stand-in,2026-11-10T13:35:35.075487+00:00,105.2,186.4,ok,0,762,56,cs600_k4_rerank,,0.1,186.2,0.0,stand-in-calibrated,
-steady_req_20,steady,stand-in,2026-11-10T13:35:37.373378+00:00,95.4,177.2,ok,0,808,55,cs600_k4_rerank,,0.2,177.1,0.0,stand-in-calibrated,
-burst_req_01,burst,stand-in,2026-11-10T13:35:44.844388+00:00,193.0,318.1,ok,0,758,55,cs600_k4_rerank,,0.6,317.5,0.0,stand-in-calibrated,
-burst_req_02,burst,stand-in,2026-11-10T13:35:44.844388+00:00,168.8,239.6,ok,0,758,55,cs600_k4_rerank,,47.3,192.3,0.0,stand-in-calibrated,
-burst_req_03,burst,stand-in,2026-11-10T13:35:44.844388+00:00,149.1,216.6,ok,0,758,55,cs600_k4_rerank,,49.4,167.2,0.0,stand-in-calibrated,
-burst_req_04,burst,stand-in,2026-11-10T13:35:44.844388+00:00,113.4,193.7,ok,0,758,55,cs600_k4_rerank,,51.3,142.4,0.0,stand-in-calibrated,
-burst_req_05,burst,stand-in,2026-11-10T13:35:44.844388+00:00,279.7,339.9,ok,0,758,55,cs600_k4_rerank,,193.8,146.1,0.0,stand-in-calibrated,
-burst_req_06,burst,stand-in,2026-11-10T13:35:44.844388+00:00,479.3,545.6,ok,0,758,55,cs600_k4_rerank,,216.7,328.9,0.0,stand-in-calibrated,
-burst_req_07,burst,stand-in,2026-11-10T13:35:44.844388+00:00,413.2,483.0,ok,0,758,55,cs600_k4_rerank,,239.6,243.4,0.0,stand-in-calibrated,
-burst_req_08,burst,stand-in,2026-11-10T13:35:44.844388+00:00,440.2,521.2,ok,0,758,55,cs600_k4_rerank,,318.0,203.2,0.0,stand-in-calibrated,
-burst_req_09,burst,stand-in,2026-11-10T13:35:44.844388+00:00,460.2,521.3,ok,0,758,55,cs600_k4_rerank,,339.9,181.3,0.0,stand-in-calibrated,
-burst_req_10,burst,stand-in,2026-11-10T13:35:44.844388+00:00,638.1,719.8,ok,0,758,55,cs600_k4_rerank,,483.1,236.6,0.0,stand-in-calibrated,
-burst_req_11,burst,stand-in,2026-11-10T13:35:44.844388+00:00,638.5,719.5,ok,0,758,55,cs600_k4_rerank,,521.3,198.2,0.0,stand-in-calibrated,
-burst_req_12,burst,stand-in,2026-11-10T13:35:44.844388+00:00,639.4,719.7,ok,0,758,55,cs600_k4_rerank,,524.4,195.2,0.0,stand-in-calibrated,
-burst_req_13,burst,stand-in,2026-11-10T13:35:44.844388+00:00,669.3,735.2,ok,0,758,55,cs600_k4_rerank,,545.6,189.6,0.0,stand-in-calibrated,
-burst_req_14,burst,stand-in,2026-11-10T13:35:44.844388+00:00,838.2,919.3,ok,0,758,55,cs600_k4_rerank,,719.8,199.5,0.0,stand-in-calibrated,
-burst_req_15,burst,stand-in,2026-11-10T13:35:44.844388+00:00,808.0,888.0,ok,0,758,55,cs600_k4_rerank,,723.8,164.2,0.0,stand-in-calibrated,
-burst_req_16,burst,stand-in,2026-11-10T13:35:44.844388+00:00,917.0,997.6,ok,0,758,55,cs600_k4_rerank,,726.8,270.8,0.0,stand-in-calibrated,
-burst_req_17,burst,stand-in,2026-11-10T13:35:44.844388+00:00,995.3,1075.9,ok,0,758,55,cs600_k4_rerank,,735.2,340.6,0.0,stand-in-calibrated,
-burst_req_18,burst,stand-in,2026-11-10T13:35:44.844388+00:00,1040.8,1122.3,ok,0,758,55,cs600_k4_rerank,,888.0,234.3,0.0,stand-in-calibrated,
-burst_req_19,burst,stand-in,2026-11-10T13:35:44.844388+00:00,963.7,1044.1,ok,0,758,55,cs600_k4_rerank,,919.3,124.8,0.0,stand-in-calibrated,
-burst_req_20,burst,stand-in,2026-11-10T13:35:44.844388+00:00,1118.6,1185.2,ok,0,758,55,cs600_k4_rerank,,997.8,187.5,0.0,stand-in-calibrated,
-burst_req_21,burst,stand-in,2026-11-10T13:35:44.844388+00:00,1117.9,1185.3,ok,0,758,55,cs600_k4_rerank,,1044.2,141.1,0.0,stand-in-calibrated,
-burst_req_22,burst,stand-in,2026-11-10T13:35:44.844388+00:00,1227.2,1308.5,ok,0,758,55,cs600_k4_rerank,,1075.9,232.6,0.0,stand-in-calibrated,
-burst_req_23,burst,stand-in,2026-11-10T13:35:44.845566+00:00,,1128.3,rate_limited,0,758,0,cs600_k4_rerank,,1122.5,5.9,0.0,stand-in-calibrated,
-burst_req_24,burst,stand-in,2026-11-10T13:35:44.845566+00:00,,1131.2,rate_limited,0,758,0,cs600_k4_rerank,,1128.5,2.8,0.0,stand-in-calibrated,
-burst_req_25,burst,stand-in,2026-11-10T13:35:44.845566+00:00,,1133.5,rate_limited,0,758,0,cs600_k4_rerank,,1131.3,2.2,0.0,stand-in-calibrated,
-overload_req_01,sustained_overload,stand-in,2026-11-10T13:35:53.119183+00:00,202.4,888.2,ok,1,756,50,cs600_k4_rerank,,0.0,344.6,543.6,stand-in-calibrated,
-overload_req_02,sustained_overload,stand-in,2026-11-10T13:35:53.163263+00:00,202.8,266.7,ok,0,756,50,cs600_k4_rerank,,0.0,266.7,0.0,stand-in-calibrated,
-overload_req_03,sustained_overload,stand-in,2026-11-10T13:35:53.212373+00:00,308.8,359.7,ok,0,756,50,cs600_k4_rerank,,218.2,141.5,0.0,stand-in-calibrated,
-overload_req_04,sustained_overload,stand-in,2026-11-10T13:35:53.243794+00:00,481.1,544.8,ok,0,756,50,cs600_k4_rerank,,328.4,216.4,0.0,stand-in-calibrated,
-overload_req_05,sustained_overload,stand-in,2026-11-10T13:35:53.290873+00:00,619.8,670.7,ok,0,756,50,cs600_k4_rerank,,498.2,172.5,0.0,stand-in-calibrated,
-overload_req_06,sustained_overload,stand-in,2026-11-10T13:35:53.322331+00:00,947.4,1012.6,ok,0,756,50,cs600_k4_rerank,,639.4,373.3,0.0,stand-in-calibrated,
-overload_req_07,sustained_overload,stand-in,2026-11-10T13:35:53.368141+00:00,838.9,904.5,ok,0,756,50,cs600_k4_rerank,,639.5,265.0,0.0,stand-in-calibrated,
-overload_req_08,sustained_overload,stand-in,2026-11-10T13:35:53.398425+00:00,933.4,999.6,ok,0,756,50,cs600_k4_rerank,,874.8,124.8,0.0,stand-in-calibrated,
-overload_req_09,sustained_overload,stand-in,2026-11-10T13:35:53.429992+00:00,1258.7,1323.6,ok,0,756,50,cs600_k4_rerank,,904.6,419.0,0.0,stand-in-calibrated,
-overload_req_10,sustained_overload,stand-in,2026-11-10T13:35:53.492552+00:00,1074.6,1138.5,ok,0,756,50,cs600_k4_rerank,,905.8,232.7,0.0,stand-in-calibrated,
-overload_req_11,sustained_overload,stand-in,2026-11-10T13:35:53.524050+00:00,,999.6,timeout,0,0,0,cs600_k4_rerank,,0.0,0.0,0.0,stand-in-calibrated,Request spent 1.0s waiting in admission queue and timed out.
-overload_req_12,sustained_overload,stand-in,2026-11-10T13:35:53.571029+00:00,,0.5,rate_limited,0,0,0,cs600_k4_rerank,,0.0,0.0,0.0,stand-in-calibrated,Admission queue full (8 requests buffered). Please retry later.
-overload_req_13,sustained_overload,stand-in,2026-11-10T13:35:53.619020+00:00,,1012.5,timeout,0,0,0,cs600_k4_rerank,,0.0,0.0,0.0,stand-in-calibrated,Request spent 1.0s waiting in admission queue and timed out.
-overload_req_14,sustained_overload,stand-in,2026-11-10T13:35:53.649837+00:00,,0.3,rate_limited,0,0,0,cs600_k4_rerank,,0.0,0.0,0.0,stand-in-calibrated,Admission queue full (8 requests buffered). Please retry later.
-overload_req_15,sustained_overload,stand-in,2026-11-10T13:35:53.681071+00:00,,0.2,rate_limited,0,0,0,cs600_k4_rerank,,0.0,0.0,0.0,stand-in-calibrated,Admission queue full (8 requests buffered). Please retry later.
-overload_req_16,sustained_overload,stand-in,2026-11-10T13:35:53.727570+00:00,,0.3,rate_limited,0,0,0,cs600_k4_rerank,,0.0,0.0,0.0,stand-in-calibrated,Admission queue full (8 requests buffered). Please retry later.
-overload_req_17,sustained_overload,stand-in,2026-11-10T13:35:53.758413+00:00,,0.2,rate_limited,0,0,0,cs600_k4_rerank,,0.0,0.0,0.0,stand-in-calibrated,Admission queue full (8 requests buffered). Please retry later.
-overload_req_18,sustained_overload,stand-in,2026-11-10T13:35:53.788533+00:00,,0.2,rate_limited,0,0,0,cs600_k4_rerank,,0.0,0.0,0.0,stand-in-calibrated,Admission queue full (8 requests buffered). Please retry later.
-overload_req_19,sustained_overload,stand-in,2026-11-10T13:35:53.851204+00:00,1102.3,1167.7,ok,0,756,50,cs600_k4_rerank,,780.7,387.1,0.0,stand-in-calibrated,
-overload_req_20,sustained_overload,stand-in,2026-11-10T13:35:53.881662+00:00,,0.2,rate_limited,0,0,0,cs600_k4_rerank,,0.0,0.0,0.0,stand-in-calibrated,Admission queue full (8 requests buffered). Please retry later.
-overload_req_21,sustained_overload,stand-in,2026-11-10T13:35:53.913512+00:00,,0.2,rate_limited,0,0,0,cs600_k4_rerank,,0.0,0.0,0.0,stand-in-calibrated,Admission queue full (8 requests buffered). Please retry later.
-overload_req_22,sustained_overload,stand-in,2026-11-10T13:35:53.960964+00:00,,0.2,rate_limited,0,0,0,cs600_k4_rerank,,0.0,0.0,0.0,stand-in-calibrated,Admission queue full (8 requests buffered). Please retry later.
-overload_req_23,sustained_overload,stand-in,2026-11-10T13:35:54.007209+00:00,977.0,1027.2,ok,0,756,50,cs600_k4_rerank,,747.0,280.1,0.0,stand-in-calibrated,
-overload_req_24,sustained_overload,stand-in,2026-11-10T13:35:54.053497+00:00,1238.5,1304.7,ok,0,756,50,cs600_k4_rerank,,965.1,339.6,0.0,stand-in-calibrated,
-overload_req_25,sustained_overload,stand-in,2026-11-10T13:35:54.084765+00:00,,0.2,rate_limited,0,0,0,cs600_k4_rerank,,0.0,0.0,0.0,stand-in-calibrated,Admission queue full (8 requests buffered). Please retry later.
-overload_req_26,sustained_overload,stand-in,2026-11-10T13:35:54.130658+00:00,,0.2,rate_limited,0,0,0,cs600_k4_rerank,,0.0,0.0,0.0,stand-in-calibrated,Admission queue full (8 requests buffered). Please retry later.
-overload_req_27,sustained_overload,stand-in,2026-11-10T13:35:54.161512+00:00,,0.2,rate_limited,0,0,0,cs600_k4_rerank,,0.0,0.0,0.0,stand-in-calibrated,Admission queue full (8 requests buffered). Please retry later.
-overload_req_28,sustained_overload,stand-in,2026-11-10T13:35:54.209374+00:00,,0.4,rate_limited,0,0,0,cs600_k4_rerank,,0.0,0.0,0.0,stand-in-calibrated,Admission queue full (8 requests buffered). Please retry later.
-overload_req_29,sustained_overload,stand-in,2026-11-10T13:35:54.240828+00:00,,0.2,rate_limited,0,0,0,cs600_k4_rerank,,0.0,0.0,0.0,stand-in-calibrated,Admission queue full (8 requests buffered). Please retry later.
-overload_req_30,sustained_overload,stand-in,2026-11-10T13:35:54.272573+00:00,,0.2,rate_limited,0,0,0,cs600_k4_rerank,,0.0,0.0,0.0,stand-in-calibrated,Admission queue full (8 requests buffered). Please retry later.
-overload_req_31,sustained_overload,stand-in,2026-11-10T13:35:54.334690+00:00,896.6,961.0,ok,0,756,50,cs600_k4_rerank,,699.8,261.2,0.0,stand-in-calibrated,
-overload_req_32,sustained_overload,stand-in,2026-11-10T13:35:54.366693+00:00,1146.6,1198.2,ok,0,756,50,cs600_k4_rerank,,929.2,269.0,0.0,stand-in-calibrated,
-overload_req_33,sustained_overload,stand-in,2026-11-10T13:35:54.397932+00:00,,0.2,rate_limited,0,0,0,cs600_k4_rerank,,0.0,0.0,0.0,stand-in-calibrated,Admission queue full (8 requests buffered). Please retry later.
-overload_req_34,sustained_overload,stand-in,2026-11-10T13:35:54.444820+00:00,1020.3,1071.6,ok,0,756,50,cs600_k4_rerank,,913.8,157.8,0.0,stand-in-calibrated,
-overload_req_35,sustained_overload,stand-in,2026-11-10T13:35:54.491505+00:00,,0.2,rate_limited,0,0,0,cs600_k4_rerank,,0.0,0.0,0.0,stand-in-calibrated,Admission queue full (8 requests buffered). Please retry later.
-overload_req_36,sustained_overload,stand-in,2026-11-10T13:35:54.523136+00:00,,0.2,rate_limited,0,0,0,cs600_k4_rerank,,0.0,0.0,0.0,stand-in-calibrated,Admission queue full (8 requests buffered). Please retry later.
-overload_req_37,sustained_overload,stand-in,2026-11-10T13:35:54.570187+00:00,1022.8,1091.7,ok,0,756,50,cs600_k4_rerank,,946.4,145.4,0.0,stand-in-calibrated,
-overload_req_38,sustained_overload,stand-in,2026-11-10T13:35:54.600714+00:00,,0.2,rate_limited,0,0,0,cs600_k4_rerank,,0.0,0.0,0.0,stand-in-calibrated,Admission queue full (8 requests buffered). Please retry later.
-overload_req_39,sustained_overload,stand-in,2026-11-10T13:35:54.630928+00:00,,0.2,rate_limited,0,0,0,cs600_k4_rerank,,0.0,0.0,0.0,stand-in-calibrated,Admission queue full (8 requests buffered). Please retry later.
-overload_req_40,sustained_overload,stand-in,2026-11-10T13:35:54.691687+00:00,967.9,1036.2,ok,0,756,50,cs600_k4_rerank,,873.2,163.0,0.0,stand-in-calibrated,
-halved_req_01,per_minute_limit_halved,stand-in,2026-11-10T13:36:02.657491+00:00,76.2,166.0,ok,0,780,38,cs600_k4_rerank,,0.1,165.9,0.0,stand-in-calibrated,
-halved_req_02,per_minute_limit_halved,stand-in,2026-11-10T13:36:03.636659+00:00,135.5,188.0,ok,0,780,38,cs600_k4_rerank,,0.1,187.9,0.0,stand-in-calibrated,
-halved_req_03,per_minute_limit_halved,stand-in,2026-11-10T13:36:04.632692+00:00,117.3,171.8,ok,0,780,38,cs600_k4_rerank,,0.2,171.6,0.0,stand-in-calibrated,
-halved_req_04,per_minute_limit_halved,stand-in,2026-11-10T13:36:05.611588+00:00,320.6,373.5,ok,0,780,38,cs600_k4_rerank,,0.1,373.4,0.0,stand-in-calibrated,
-halved_req_05,per_minute_limit_halved,stand-in,2026-11-10T13:36:06.794881+00:00,,4.8,rate_limited,0,780,0,cs600_k4_rerank,,0.1,4.7,0.0,stand-in-calibrated,Provider call failed: HTTP 429 (rate_limit_exceeded)
-halved_req_06,per_minute_limit_halved,stand-in,2026-11-10T13:36:07.601706+00:00,,6.2,rate_limited,0,780,0,cs600_k4_rerank,,0.1,6.1,0.0,stand-in-calibrated,Provider call failed: HTTP 429 (rate_limit_exceeded)
-halved_req_07,per_minute_limit_halved,stand-in,2026-11-10T13:36:08.409843+00:00,,5.5,rate_limited,0,780,0,cs600_k4_rerank,,0.1,5.5,0.0,stand-in-calibrated,Provider call failed: HTTP 429 (rate_limit_exceeded)
-halved_req_08,per_minute_limit_halved,stand-in,2026-11-10T13:36:09.224381+00:00,,5.3,rate_limited,0,780,0,cs600_k4_rerank,,0.1,5.2,0.0,stand-in-calibrated,Provider call failed: HTTP 429 (rate_limit_exceeded)
-halved_req_09,per_minute_limit_halved,stand-in,2026-11-10T13:36:10.034770+00:00,,4.1,rate_limited,0,780,0,cs600_k4_rerank,,0.1,4.0,0.0,stand-in-calibrated,Provider call failed: HTTP 429 (rate_limit_exceeded)
-halved_req_10,per_minute_limit_halved,stand-in,2026-11-10T13:36:10.842824+00:00,,5.8,rate_limited,0,780,0,cs600_k4_rerank,,0.1,5.7,0.0,stand-in-calibrated,Provider call failed: HTTP 429 (rate_limit_exceeded)
-halved_req_11,per_minute_limit_halved,stand-in,2026-11-10T13:36:11.662225+00:00,,5.2,rate_limited,0,780,0,cs600_k4_rerank,,0.1,5.1,0.0,stand-in-calibrated,Provider call failed: HTTP 429 (rate_limit_exceeded)
-halved_req_12,per_minute_limit_halved,stand-in,2026-11-10T13:36:12.470002+00:00,,5.8,rate_limited,0,780,0,cs600_k4_rerank,,0.1,5.7,0.0,stand-in-calibrated,Provider call failed: HTTP 429 (rate_limit_exceeded)
-halved_req_13,per_minute_limit_halved,stand-in,2026-11-10T13:36:13.278805+00:00,,6.1,rate_limited,0,780,0,cs600_k4_rerank,,0.1,6.0,0.0,stand-in-calibrated,Provider call failed: HTTP 429 (rate_limit_exceeded)
-halved_req_14,per_minute_limit_halved,stand-in,2026-11-10T13:36:14.087350+00:00,,4.7,rate_limited,0,780,0,cs600_k4_rerank,,0.1,4.6,0.0,stand-in-calibrated,Provider call failed: HTTP 429 (rate_limit_exceeded)
-halved_req_15,per_minute_limit_halved,stand-in,2026-11-10T13:36:14.907650+00:00,,5.5,rate_limited,0,780,0,cs600_k4_rerank,,0.1,5.4,0.0,stand-in-calibrated,Provider call failed: HTTP 429 (rate_limit_exceeded)
-halved_req_16,per_minute_limit_halved,stand-in,2026-11-10T13:36:15.724258+00:00,,5.7,rate_limited,0,780,0,cs600_k4_rerank,,0.2,5.5,0.0,stand-in-calibrated,Provider call failed: HTTP 429 (rate_limit_exceeded)
-halved_req_17,per_minute_limit_halved,stand-in,2026-11-10T13:36:16.537055+00:00,,5.4,rate_limited,0,780,0,cs600_k4_rerank,,0.2,5.3,0.0,stand-in-calibrated,Provider call failed: HTTP 429 (rate_limit_exceeded)
-halved_req_18,per_minute_limit_halved,stand-in,2026-11-10T13:36:17.346380+00:00,,5.7,rate_limited,0,780,0,cs600_k4_rerank,,0.1,5.6,0.0,stand-in-calibrated,Provider call failed: HTTP 429 (rate_limit_exceeded)
-halved_req_19,per_minute_limit_halved,stand-in,2026-11-10T13:36:18.160339+00:00,,5.3,rate_limited,0,780,0,cs600_k4_rerank,,0.1,5.1,0.0,stand-in-calibrated,Provider call failed: HTTP 429 (rate_limit_exceeded)
-halved_req_20,per_minute_limit_halved,stand-in,2026-11-10T13:36:18.971094+00:00,,5.2,rate_limited,0,780,0,cs600_k4_rerank,,0.1,5.1,0.0,stand-in-calibrated,Provider call failed: HTTP 429 (rate_limit_exceeded)
-halved_req_21,per_minute_limit_halved,stand-in,2026-11-10T13:36:19.786784+00:00,,4.3,rate_limited,0,780,0,cs600_k4_rerank,,0.1,4.2,0.0,stand-in-calibrated,Provider call failed: HTTP 429 (rate_limit_exceeded)
-halved_req_22,per_minute_limit_halved,stand-in,2026-11-10T13:36:20.592330+00:00,,4.2,rate_limited,0,780,0,cs600_k4_rerank,,0.1,4.1,0.0,stand-in-calibrated,Provider call failed: HTTP 429 (rate_limit_exceeded)
-halved_req_23,per_minute_limit_halved,stand-in,2026-11-10T13:36:21.400262+00:00,,6.0,rate_limited,0,780,0,cs600_k4_rerank,,0.2,5.8,0.0,stand-in-calibrated,Provider call failed: HTTP 429 (rate_limit_exceeded)
-halved_req_24,per_minute_limit_halved,stand-in,2026-11-10T13:36:22.207932+00:00,,5.5,rate_limited,0,780,0,cs600_k4_rerank,,0.2,5.3,0.0,stand-in-calibrated,Provider call failed: HTTP 429 (rate_limit_exceeded)
-halved_req_25,per_minute_limit_halved,stand-in,2026-11-10T13:36:23.022357+00:00,,5.3,rate_limited,0,780,0,cs600_k4_rerank,,0.1,5.3,0.0,stand-in-calibrated,Provider call failed: HTTP 429 (rate_limit_exceeded)
-daily_exhaust_req_01,daily_budget_exhausted,stand-in,2026-11-10T13:36:30.577340+00:00,63.5,181.3,ok,0,896,51,cs600_k4_rerank,,0.1,181.2,0.0,stand-in-calibrated,
-daily_exhaust_req_02,daily_budget_exhausted,stand-in,2026-11-10T13:36:30.810680+00:00,48.9,112.0,ok,0,896,51,cs600_k4_rerank,,0.1,112.0,0.0,stand-in-calibrated,
-daily_exhaust_req_03,daily_budget_exhausted,stand-in,2026-11-10T13:36:30.974015+00:00,134.4,197.5,ok,0,896,51,cs600_k4_rerank,,0.1,197.5,0.0,stand-in-calibrated,
-daily_exhaust_req_04,daily_budget_exhausted,stand-in,2026-11-10T13:36:31.223397+00:00,97.2,160.3,ok,0,896,51,cs600_k4_rerank,,0.1,160.3,0.0,stand-in-calibrated,
-daily_exhaust_req_05,daily_budget_exhausted,stand-in,2026-11-10T13:36:31.437570+00:00,253.5,317.7,ok,0,896,51,cs600_k4_rerank,,0.1,317.6,0.0,stand-in-calibrated,
-daily_exhaust_req_06,daily_budget_exhausted,stand-in,2026-11-10T13:36:31.818669+00:00,,0.1,rate_limited,0,0,0,cs600_k4_rerank,,0.1,0.0,0.0,stand-in-calibrated,Daily request quota exhausted (RPD limit reached).
-daily_exhaust_req_07,daily_budget_exhausted,stand-in,2026-11-10T13:36:31.880761+00:00,,0.1,rate_limited,0,0,0,cs600_k4_rerank,,0.1,0.0,0.0,stand-in-calibrated,Daily request quota exhausted (RPD limit reached).
-daily_exhaust_req_08,daily_budget_exhausted,stand-in,2026-11-10T13:36:31.942595+00:00,,0.1,rate_limited,0,0,0,cs600_k4_rerank,,0.1,0.0,0.0,stand-in-calibrated,Daily request quota exhausted (RPD limit reached).
-daily_exhaust_req_09,daily_budget_exhausted,stand-in,2026-11-10T13:36:32.005234+00:00,,0.2,rate_limited,0,0,0,cs600_k4_rerank,,0.2,0.0,0.0,stand-in-calibrated,Daily request quota exhausted (RPD limit reached).
-daily_exhaust_req_10,daily_budget_exhausted,stand-in,2026-11-10T13:36:32.067535+00:00,,0.1,rate_limited,0,0,0,cs600_k4_rerank,,0.1,0.0,0.0,stand-in-calibrated,Daily request quota exhausted (RPD limit reached).
-daily_exhaust_req_11,daily_budget_exhausted,stand-in,2026-11-10T13:36:32.129489+00:00,,0.1,rate_limited,0,0,0,cs600_k4_rerank,,0.1,0.0,0.0,stand-in-calibrated,Daily request quota exhausted (RPD limit reached).
-daily_exhaust_req_12,daily_budget_exhausted,stand-in,2026-11-10T13:36:32.190496+00:00,,0.1,rate_limited,0,0,0,cs600_k4_rerank,,0.1,0.0,0.0,stand-in-calibrated,Daily request quota exhausted (RPD limit reached).
-daily_exhaust_req_13,daily_budget_exhausted,stand-in,2026-11-10T13:36:32.252523+00:00,,0.1,rate_limited,0,0,0,cs600_k4_rerank,,0.1,0.0,0.0,stand-in-calibrated,Daily request quota exhausted (RPD limit reached).
-daily_exhaust_req_14,daily_budget_exhausted,stand-in,2026-11-10T13:36:32.316037+00:00,,0.1,rate_limited,0,0,0,cs600_k4_rerank,,0.1,0.0,0.0,stand-in-calibrated,Daily request quota exhausted (RPD limit reached).
-daily_exhaust_req_15,daily_budget_exhausted,stand-in,2026-11-10T13:36:32.379143+00:00,,0.1,rate_limited,0,0,0,cs600_k4_rerank,,0.1,0.0,0.0,stand-in-calibrated,Daily request quota exhausted (RPD limit reached).
-daily_exhaust_req_16,daily_budget_exhausted,stand-in,2026-11-10T13:36:32.442592+00:00,,0.1,rate_limited,0,0,0,cs600_k4_rerank,,0.1,0.0,0.0,stand-in-calibrated,Daily request quota exhausted (RPD limit reached).
-daily_exhaust_req_17,daily_budget_exhausted,stand-in,2026-11-10T13:36:32.504039+00:00,,0.1,rate_limited,0,0,0,cs600_k4_rerank,,0.1,0.0,0.0,stand-in-calibrated,Daily request quota exhausted (RPD limit reached).
-daily_exhaust_req_18,daily_budget_exhausted,stand-in,2026-11-10T13:36:32.565174+00:00,,0.1,rate_limited,0,0,0,cs600_k4_rerank,,0.1,0.0,0.0,stand-in-calibrated,Daily request quota exhausted (RPD limit reached).
-daily_exhaust_req_19,daily_budget_exhausted,stand-in,2026-11-10T13:36:32.627229+00:00,,0.1,rate_limited,0,0,0,cs600_k4_rerank,,0.1,0.0,0.0,stand-in-calibrated,Daily request quota exhausted (RPD limit reached).
-daily_exhaust_req_20,daily_budget_exhausted,stand-in,2026-11-10T13:36:32.689793+00:00,,0.1,rate_limited,0,0,0,cs600_k4_rerank,,0.1,0.0,0.0,stand-in-calibrated,Daily request quota exhausted (RPD limit reached).
+retrieval_cs300_k3_no-rerank_q01,retrieval_cs300_k3_no-rerank,stand-in,2026-11-10T13:57:05.551644+00:00,878.7,993.9,ok,0,429,44,cs300_k3_no-rerank,correct,0.2,993.7,0.0,stand-in-calibrated,
+retrieval_cs300_k3_no-rerank_q02,retrieval_cs300_k3_no-rerank,stand-in,2026-11-10T13:57:06.545745+00:00,865.4,931.2,ok,0,427,44,cs300_k3_no-rerank,correct,0.2,931.0,0.0,stand-in-calibrated,
+retrieval_cs300_k3_no-rerank_q03,retrieval_cs300_k3_no-rerank,stand-in,2026-11-10T13:57:07.477642+00:00,884.4,966.4,ok,0,425,50,cs300_k3_no-rerank,wrong,0.1,966.3,0.0,stand-in-calibrated,
+retrieval_cs300_k3_no-rerank_q04,retrieval_cs300_k3_no-rerank,stand-in,2026-11-10T13:57:08.444353+00:00,860.1,924.1,ok,0,428,48,cs300_k3_no-rerank,correct,0.2,923.9,0.0,stand-in-calibrated,
+retrieval_cs300_k3_no-rerank_q05,retrieval_cs300_k3_no-rerank,stand-in,2026-11-10T13:57:09.368390+00:00,847.5,914.7,ok,0,437,51,cs300_k3_no-rerank,correct,0.1,914.6,0.0,stand-in-calibrated,
+retrieval_cs300_k3_no-rerank_q06,retrieval_cs300_k3_no-rerank,stand-in,2026-11-10T13:57:10.283219+00:00,874.4,947.3,ok,0,429,50,cs300_k3_no-rerank,wrong,0.1,947.2,0.0,stand-in-calibrated,
+retrieval_cs300_k3_no-rerank_q07,retrieval_cs300_k3_no-rerank,stand-in,2026-11-10T13:57:11.230784+00:00,848.4,916.8,ok,0,447,51,cs300_k3_no-rerank,correct,0.1,916.7,0.0,stand-in-calibrated,
+retrieval_cs300_k3_no-rerank_q08,retrieval_cs300_k3_no-rerank,stand-in,2026-11-10T13:57:12.147731+00:00,890.8,974.8,ok,0,437,57,cs300_k3_no-rerank,wrong,0.1,974.7,0.0,stand-in-calibrated,
+retrieval_cs300_k3_no-rerank_q09,retrieval_cs300_k3_no-rerank,stand-in,2026-11-10T13:57:13.122556+00:00,853.2,918.8,ok,0,507,48,cs300_k3_no-rerank,wrong,0.1,918.7,0.0,stand-in-calibrated,
+retrieval_cs300_k3_no-rerank_q10,retrieval_cs300_k3_no-rerank,stand-in,2026-11-10T13:57:14.041790+00:00,879.5,935.4,ok,0,439,43,cs300_k3_no-rerank,wrong,0.1,935.3,0.0,stand-in-calibrated,
+retrieval_cs300_k3_no-rerank_q11,retrieval_cs300_k3_no-rerank,stand-in,2026-11-10T13:57:14.977163+00:00,893.3,965.9,ok,0,532,44,cs300_k3_no-rerank,correct,0.1,965.8,0.0,stand-in-calibrated,
+retrieval_cs300_k3_no-rerank_q12,retrieval_cs300_k3_no-rerank,stand-in,2026-11-10T13:57:15.943124+00:00,903.1,976.2,ok,0,467,51,cs300_k3_no-rerank,wrong,0.1,976.1,0.0,stand-in-calibrated,
+retrieval_cs300_k3_no-rerank_q13,retrieval_cs300_k3_no-rerank,stand-in,2026-11-10T13:57:16.919213+00:00,10.1,0.2,ok,0,15,25,cs300_k3_no-rerank,refused_correctly,0.1,0.1,0.0,stand-in-calibrated,
+retrieval_cs300_k3_no-rerank_q14,retrieval_cs300_k3_no-rerank,stand-in,2026-11-10T13:57:16.919213+00:00,10.1,0.1,ok,0,15,25,cs300_k3_no-rerank,refused_correctly,0.1,0.0,0.0,stand-in-calibrated,
+retrieval_cs300_k3_no-rerank_q15,retrieval_cs300_k3_no-rerank,stand-in,2026-11-10T13:57:16.919213+00:00,10.1,0.1,ok,0,15,25,cs300_k3_no-rerank,refused_correctly,0.1,0.1,0.0,stand-in-calibrated,
+retrieval_cs300_k3_no-rerank_q16,retrieval_cs300_k3_no-rerank,stand-in,2026-11-10T13:57:16.920219+00:00,910.9,993.8,ok,0,465,56,cs300_k3_no-rerank,wrong,0.1,993.7,0.0,stand-in-calibrated,
+retrieval_cs300_k3_no-rerank_q17,retrieval_cs300_k3_no-rerank,stand-in,2026-11-10T13:57:17.913856+00:00,866.7,936.0,ok,0,512,48,cs300_k3_no-rerank,correct,0.1,936.0,0.0,stand-in-calibrated,
+retrieval_cs300_k3_no-rerank_q18,retrieval_cs300_k3_no-rerank,stand-in,2026-11-10T13:57:18.849627+00:00,889.8,952.1,ok,0,424,38,cs300_k3_no-rerank,correct,0.1,952.0,0.0,stand-in-calibrated,
+retrieval_cs600_k4_rerank_q01,retrieval_cs600_k4_rerank,stand-in,2026-11-10T13:57:19.802243+00:00,897.3,1007.7,ok,0,764,44,cs600_k4_rerank,correct,0.1,1007.6,0.0,stand-in-calibrated,
+retrieval_cs600_k4_rerank_q02,retrieval_cs600_k4_rerank,stand-in,2026-11-10T13:57:20.810243+00:00,878.6,939.4,ok,0,784,47,cs600_k4_rerank,correct,0.1,939.3,0.0,stand-in-calibrated,
+retrieval_cs600_k4_rerank_q03,retrieval_cs600_k4_rerank,stand-in,2026-11-10T13:57:21.749683+00:00,853.1,905.0,ok,0,853,39,cs600_k4_rerank,wrong,0.1,904.9,0.0,stand-in-calibrated,
+retrieval_cs600_k4_rerank_q04,retrieval_cs600_k4_rerank,stand-in,2026-11-10T13:57:22.654875+00:00,849.6,916.7,ok,0,820,55,cs600_k4_rerank,wrong,0.1,916.6,0.0,stand-in-calibrated,
+retrieval_cs600_k4_rerank_q05,retrieval_cs600_k4_rerank,stand-in,2026-11-10T13:57:23.571860+00:00,845.6,914.4,ok,0,927,51,cs600_k4_rerank,correct,0.1,914.3,0.0,stand-in-calibrated,
+retrieval_cs600_k4_rerank_q06,retrieval_cs600_k4_rerank,stand-in,2026-11-10T13:57:24.486068+00:00,873.2,940.9,ok,0,807,50,cs600_k4_rerank,wrong,0.1,940.8,0.0,stand-in-calibrated,
+retrieval_cs600_k4_rerank_q07,retrieval_cs600_k4_rerank,stand-in,2026-11-10T13:57:25.427494+00:00,868.4,936.7,ok,0,865,51,cs600_k4_rerank,correct,0.1,936.6,0.0,stand-in-calibrated,
+retrieval_cs600_k4_rerank_q08,retrieval_cs600_k4_rerank,stand-in,2026-11-10T13:57:26.364505+00:00,875.0,956.9,ok,0,793,57,cs600_k4_rerank,wrong,0.1,956.8,0.0,stand-in-calibrated,
+retrieval_cs600_k4_rerank_q09,retrieval_cs600_k4_rerank,stand-in,2026-11-10T13:57:27.321457+00:00,827.8,894.3,ok,0,884,50,cs600_k4_rerank,correct,0.1,894.2,0.0,stand-in-calibrated,
+retrieval_cs600_k4_rerank_q10,retrieval_cs600_k4_rerank,stand-in,2026-11-10T13:57:28.215841+00:00,854.4,921.9,ok,0,865,47,cs600_k4_rerank,wrong,0.1,921.8,0.0,stand-in-calibrated,
+retrieval_cs600_k4_rerank_q11,retrieval_cs600_k4_rerank,stand-in,2026-11-10T13:57:29.137739+00:00,865.5,922.3,ok,0,942,44,cs600_k4_rerank,correct,0.1,922.2,0.0,stand-in-calibrated,
+retrieval_cs600_k4_rerank_q12,retrieval_cs600_k4_rerank,stand-in,2026-11-10T13:57:30.060182+00:00,857.9,920.4,ok,0,864,47,cs600_k4_rerank,wrong,0.1,920.3,0.0,stand-in-calibrated,
+retrieval_cs600_k4_rerank_q13,retrieval_cs600_k4_rerank,stand-in,2026-11-10T13:57:30.980842+00:00,10.1,0.2,ok,0,15,25,cs600_k4_rerank,refused_correctly,0.1,0.1,0.0,stand-in-calibrated,
+retrieval_cs600_k4_rerank_q14,retrieval_cs600_k4_rerank,stand-in,2026-11-10T13:57:30.980842+00:00,10.1,0.1,ok,0,15,25,cs600_k4_rerank,refused_correctly,0.1,0.1,0.0,stand-in-calibrated,
+retrieval_cs600_k4_rerank_q15,retrieval_cs600_k4_rerank,stand-in,2026-11-10T13:57:30.980842+00:00,10.0,0.1,ok,0,15,25,cs600_k4_rerank,refused_correctly,0.0,0.1,0.0,stand-in-calibrated,
+retrieval_cs600_k4_rerank_q16,retrieval_cs600_k4_rerank,stand-in,2026-11-10T13:57:30.980842+00:00,880.9,962.7,ok,0,901,56,cs600_k4_rerank,wrong,0.0,962.7,0.0,stand-in-calibrated,
+retrieval_cs600_k4_rerank_q17,retrieval_cs600_k4_rerank,stand-in,2026-11-10T13:57:31.944326+00:00,871.1,935.5,ok,0,948,48,cs600_k4_rerank,correct,0.1,935.4,0.0,stand-in-calibrated,
+retrieval_cs600_k4_rerank_q18,retrieval_cs600_k4_rerank,stand-in,2026-11-10T13:57:32.879822+00:00,882.2,935.7,ok,0,824,38,cs600_k4_rerank,correct,0.1,935.6,0.0,stand-in-calibrated,
+retrieval_cs1000_k6_rerank_q01,retrieval_cs1000_k6_rerank,stand-in,2026-11-10T13:57:33.816250+00:00,850.6,955.5,ok,0,1573,44,cs1000_k6_rerank,correct,0.1,955.4,0.0,stand-in-calibrated,
+retrieval_cs1000_k6_rerank_q02,retrieval_cs1000_k6_rerank,stand-in,2026-11-10T13:57:34.771535+00:00,873.5,937.0,ok,0,1832,47,cs1000_k6_rerank,correct,0.1,937.0,0.0,stand-in-calibrated,
+retrieval_cs1000_k6_rerank_q03,retrieval_cs1000_k6_rerank,stand-in,2026-11-10T13:57:35.708751+00:00,893.9,942.4,ok,0,1664,39,cs1000_k6_rerank,wrong,0.1,942.3,0.0,stand-in-calibrated,
+retrieval_cs1000_k6_rerank_q04,retrieval_cs1000_k6_rerank,stand-in,2026-11-10T13:57:36.651070+00:00,862.9,929.2,ok,0,1786,55,cs1000_k6_rerank,wrong,0.1,929.1,0.0,stand-in-calibrated,
+retrieval_cs1000_k6_rerank_q05,retrieval_cs1000_k6_rerank,stand-in,2026-11-10T13:57:37.580685+00:00,831.6,896.4,ok,0,1737,51,cs1000_k6_rerank,correct,0.1,896.3,0.0,stand-in-calibrated,
+retrieval_cs1000_k6_rerank_q06,retrieval_cs1000_k6_rerank,stand-in,2026-11-10T13:57:38.477000+00:00,880.5,961.2,ok,0,1687,55,cs1000_k6_rerank,wrong,0.1,961.1,0.0,stand-in-calibrated,
+retrieval_cs1000_k6_rerank_q07,retrieval_cs1000_k6_rerank,stand-in,2026-11-10T13:57:39.438492+00:00,849.2,912.6,ok,0,1705,51,cs1000_k6_rerank,correct,0.1,912.5,0.0,stand-in-calibrated,
+retrieval_cs1000_k6_rerank_q08,retrieval_cs1000_k6_rerank,stand-in,2026-11-10T13:57:40.351410+00:00,868.8,937.0,ok,0,1520,57,cs1000_k6_rerank,wrong,0.1,936.9,0.0,stand-in-calibrated,
+retrieval_cs1000_k6_rerank_q09,retrieval_cs1000_k6_rerank,stand-in,2026-11-10T13:57:41.288447+00:00,841.5,902.4,ok,0,1688,50,cs1000_k6_rerank,correct,0.1,902.3,0.0,stand-in-calibrated,
+retrieval_cs1000_k6_rerank_q10,retrieval_cs1000_k6_rerank,stand-in,2026-11-10T13:57:42.190959+00:00,850.4,918.7,ok,0,1851,50,cs1000_k6_rerank,wrong,0.1,918.7,0.0,stand-in-calibrated,
+retrieval_cs1000_k6_rerank_q11,retrieval_cs1000_k6_rerank,stand-in,2026-11-10T13:57:43.110016+00:00,838.0,904.8,ok,0,1840,44,cs1000_k6_rerank,correct,0.1,904.7,0.0,stand-in-calibrated,
+retrieval_cs1000_k6_rerank_q12,retrieval_cs1000_k6_rerank,stand-in,2026-11-10T13:57:44.014615+00:00,888.0,954.2,ok,0,1755,47,cs1000_k6_rerank,wrong,0.1,954.1,0.0,stand-in-calibrated,
+retrieval_cs1000_k6_rerank_q13,retrieval_cs1000_k6_rerank,stand-in,2026-11-10T13:57:44.968888+00:00,10.1,0.1,ok,0,15,25,cs1000_k6_rerank,refused_correctly,0.1,0.1,0.0,stand-in-calibrated,
+retrieval_cs1000_k6_rerank_q14,retrieval_cs1000_k6_rerank,stand-in,2026-11-10T13:57:44.968888+00:00,10.0,0.1,ok,0,15,25,cs1000_k6_rerank,refused_correctly,0.0,0.0,0.0,stand-in-calibrated,
+retrieval_cs1000_k6_rerank_q15,retrieval_cs1000_k6_rerank,stand-in,2026-11-10T13:57:44.968888+00:00,10.0,0.1,ok,0,15,25,cs1000_k6_rerank,refused_correctly,0.0,0.0,0.0,stand-in-calibrated,
+retrieval_cs1000_k6_rerank_q16,retrieval_cs1000_k6_rerank,stand-in,2026-11-10T13:57:44.968888+00:00,868.5,947.9,ok,0,1716,56,cs1000_k6_rerank,wrong,0.0,947.8,0.0,stand-in-calibrated,
+retrieval_cs1000_k6_rerank_q17,retrieval_cs1000_k6_rerank,stand-in,2026-11-10T13:57:45.917226+00:00,857.7,923.0,ok,0,1839,48,cs1000_k6_rerank,correct,0.1,922.9,0.0,stand-in-calibrated,
+retrieval_cs1000_k6_rerank_q18,retrieval_cs1000_k6_rerank,stand-in,2026-11-10T13:57:46.840357+00:00,864.0,915.5,ok,0,1695,38,cs1000_k6_rerank,correct,0.1,915.4,0.0,stand-in-calibrated,
+steady_req_01,steady,stand-in,2026-11-10T13:57:55.025028+00:00,863.3,979.2,ok,0,735,44,cs600_k4_rerank,,0.1,979.1,0.0,stand-in-calibrated,
+steady_req_02,steady,stand-in,2026-11-10T13:57:58.119019+00:00,866.4,934.1,ok,0,870,46,cs600_k4_rerank,,0.2,933.9,0.0,stand-in-calibrated,
+steady_req_03,steady,stand-in,2026-11-10T13:58:01.159312+00:00,857.2,928.3,ok,0,762,56,cs600_k4_rerank,,0.1,928.2,0.0,stand-in-calibrated,
+steady_req_04,steady,stand-in,2026-11-10T13:58:04.189703+00:00,849.4,930.2,ok,0,808,55,cs600_k4_rerank,,0.1,930.1,0.0,stand-in-calibrated,
+steady_req_05,steady,stand-in,2026-11-10T13:58:07.222457+00:00,844.4,898.7,ok,0,735,44,cs600_k4_rerank,,0.1,898.6,0.0,stand-in-calibrated,
+steady_req_06,steady,stand-in,2026-11-10T13:58:10.230627+00:00,860.8,933.6,ok,0,870,46,cs600_k4_rerank,,0.1,933.5,0.0,stand-in-calibrated,
+steady_req_07,steady,stand-in,2026-11-10T13:58:13.275333+00:00,854.3,935.7,ok,0,762,56,cs600_k4_rerank,,0.1,935.5,0.0,stand-in-calibrated,
+steady_req_08,steady,stand-in,2026-11-10T13:58:16.316920+00:00,855.8,936.8,ok,0,808,55,cs600_k4_rerank,,0.1,936.7,0.0,stand-in-calibrated,
+steady_req_09,steady,stand-in,2026-11-10T13:58:19.362022+00:00,,5.2,rate_limited,0,735,0,cs600_k4_rerank,,0.1,5.1,0.0,stand-in-calibrated,
+steady_req_10,steady,stand-in,2026-11-10T13:58:21.473440+00:00,,4.6,rate_limited,0,870,0,cs600_k4_rerank,,0.1,4.5,0.0,stand-in-calibrated,
+steady_req_11,steady,stand-in,2026-11-10T13:58:23.579119+00:00,,3.4,rate_limited,0,762,0,cs600_k4_rerank,,0.1,3.3,0.0,stand-in-calibrated,
+steady_req_12,steady,stand-in,2026-11-10T13:58:25.682601+00:00,867.6,30344.3,ok,1,808,55,cs600_k4_rerank,,0.1,944.2,29400.0,stand-in-calibrated,
+steady_req_13,steady,stand-in,2026-11-10T13:58:58.132089+00:00,881.2,946.5,ok,0,735,44,cs600_k4_rerank,,0.1,946.4,0.0,stand-in-calibrated,
+steady_req_14,steady,stand-in,2026-11-10T13:59:01.185238+00:00,883.0,950.8,ok,0,870,46,cs600_k4_rerank,,0.1,950.7,0.0,stand-in-calibrated,
+steady_req_15,steady,stand-in,2026-11-10T13:59:04.241370+00:00,864.1,941.0,ok,0,762,56,cs600_k4_rerank,,0.2,940.8,0.0,stand-in-calibrated,
+steady_req_16,steady,stand-in,2026-11-10T13:59:07.284441+00:00,851.0,934.8,ok,0,808,55,cs600_k4_rerank,,0.3,934.5,0.0,stand-in-calibrated,
+steady_req_17,steady,stand-in,2026-11-10T13:59:10.332211+00:00,863.2,930.8,ok,0,735,44,cs600_k4_rerank,,0.1,930.7,0.0,stand-in-calibrated,
+steady_req_18,steady,stand-in,2026-11-10T13:59:13.375426+00:00,831.5,895.7,ok,0,870,46,cs600_k4_rerank,,0.1,895.6,0.0,stand-in-calibrated,
+steady_req_19,steady,stand-in,2026-11-10T13:59:16.385781+00:00,881.3,962.1,ok,0,762,56,cs600_k4_rerank,,0.1,962.0,0.0,stand-in-calibrated,
+steady_req_20,steady,stand-in,2026-11-10T13:59:19.450308+00:00,,4.0,rate_limited,0,808,0,cs600_k4_rerank,,0.1,3.9,0.0,stand-in-calibrated,
+burst_req_01,burst,stand-in,2026-11-10T13:59:27.055120+00:00,888.8,985.4,ok,0,758,55,cs600_k4_rerank,,0.6,984.8,0.0,stand-in-calibrated,
+burst_req_02,burst,stand-in,2026-11-10T13:59:27.055120+00:00,983.1,1032.3,ok,0,758,55,cs600_k4_rerank,,49.7,982.6,0.0,stand-in-calibrated,
+burst_req_03,burst,stand-in,2026-11-10T13:59:27.055120+00:00,1030.0,1095.3,ok,0,758,55,cs600_k4_rerank,,51.8,1043.5,0.0,stand-in-calibrated,
+burst_req_04,burst,stand-in,2026-11-10T13:59:27.055120+00:00,1093.2,1173.3,ok,0,758,55,cs600_k4_rerank,,53.9,1119.4,0.0,stand-in-calibrated,
+burst_req_05,burst,stand-in,2026-11-10T13:59:27.055120+00:00,2054.8,2126.2,ok,0,758,55,cs600_k4_rerank,,985.4,1140.9,0.0,stand-in-calibrated,
+burst_req_06,burst,stand-in,2026-11-10T13:59:27.055120+00:00,2122.1,2188.0,ok,0,758,55,cs600_k4_rerank,,1032.3,1155.7,0.0,stand-in-calibrated,
+burst_req_07,burst,stand-in,2026-11-10T13:59:27.055120+00:00,2183.8,2250.9,ok,0,758,55,cs600_k4_rerank,,1095.3,1155.6,0.0,stand-in-calibrated,
+burst_req_08,burst,stand-in,2026-11-10T13:59:27.055120+00:00,2246.7,2330.3,ok,0,758,55,cs600_k4_rerank,,1173.3,1157.0,0.0,stand-in-calibrated,
+burst_req_09,burst,stand-in,2026-11-10T13:59:27.055120+00:00,3198.3,3268.0,ok,0,758,55,cs600_k4_rerank,,2126.4,1141.6,0.0,stand-in-calibrated,
+burst_req_10,burst,stand-in,2026-11-10T13:59:27.055120+00:00,3260.7,3314.1,ok,0,758,55,cs600_k4_rerank,,2188.1,1126.0,0.0,stand-in-calibrated,
+burst_req_11,burst,stand-in,2026-11-10T13:59:27.055120+00:00,3307.7,3392.3,ok,0,758,55,cs600_k4_rerank,,2251.0,1141.2,0.0,stand-in-calibrated,
+burst_req_12,burst,stand-in,2026-11-10T13:59:27.055120+00:00,3388.2,3469.7,ok,0,758,55,cs600_k4_rerank,,2330.4,1139.3,0.0,stand-in-calibrated,
+burst_req_13,burst,stand-in,2026-11-10T13:59:27.055120+00:00,4337.6,4417.5,ok,0,758,55,cs600_k4_rerank,,3268.1,1149.4,0.0,stand-in-calibrated,
+burst_req_14,burst,stand-in,2026-11-10T13:59:27.055120+00:00,4368.4,4417.7,ok,0,758,55,cs600_k4_rerank,,3314.1,1103.5,0.0,stand-in-calibrated,
+burst_req_15,burst,stand-in,2026-11-10T13:59:27.055120+00:00,4445.7,4512.1,ok,0,758,55,cs600_k4_rerank,,3392.3,1119.7,0.0,stand-in-calibrated,
+burst_req_16,burst,stand-in,2026-11-10T13:59:27.055120+00:00,4554.7,4621.3,ok,0,758,55,cs600_k4_rerank,,3469.8,1151.6,0.0,stand-in-calibrated,
+burst_req_17,burst,stand-in,2026-11-10T13:59:27.055120+00:00,5439.8,5507.3,ok,0,758,55,cs600_k4_rerank,,4417.7,1089.5,0.0,stand-in-calibrated,
+burst_req_18,burst,stand-in,2026-11-10T13:59:27.055120+00:00,5504.1,5570.0,ok,0,758,55,cs600_k4_rerank,,4422.7,1147.3,0.0,stand-in-calibrated,
+burst_req_19,burst,stand-in,2026-11-10T13:59:27.055120+00:00,5534.0,5600.9,ok,0,758,55,cs600_k4_rerank,,4512.1,1088.8,0.0,stand-in-calibrated,
+burst_req_20,burst,stand-in,2026-11-10T13:59:27.055120+00:00,5687.7,5769.5,ok,0,758,55,cs600_k4_rerank,,4621.6,1148.0,0.0,stand-in-calibrated,
+burst_req_21,burst,stand-in,2026-11-10T13:59:27.055120+00:00,6571.6,6640.6,ok,0,758,55,cs600_k4_rerank,,5507.3,1133.3,0.0,stand-in-calibrated,
+burst_req_22,burst,stand-in,2026-11-10T13:59:27.055120+00:00,6636.6,6717.7,ok,0,758,55,cs600_k4_rerank,,5570.0,1147.7,0.0,stand-in-calibrated,
+burst_req_23,burst,stand-in,2026-11-10T13:59:27.055120+00:00,,5604.6,rate_limited,0,758,0,cs600_k4_rerank,,5600.9,3.7,0.0,stand-in-calibrated,
+burst_req_24,burst,stand-in,2026-11-10T13:59:27.055120+00:00,,5607.4,rate_limited,0,758,0,cs600_k4_rerank,,5604.7,2.7,0.0,stand-in-calibrated,
+burst_req_25,burst,stand-in,2026-11-10T13:59:27.055120+00:00,,5609.6,rate_limited,0,758,0,cs600_k4_rerank,,5607.4,2.1,0.0,stand-in-calibrated,
+overload_req_01,sustained_overload,stand-in,2026-11-10T13:59:41.148925+00:00,979.5,1782.7,ok,1,756,50,cs600_k4_rerank,,0.0,1174.4,608.3,stand-in-calibrated,
+overload_req_02,sustained_overload,stand-in,2026-11-10T13:59:41.197242+00:00,876.0,924.5,ok,0,756,50,cs600_k4_rerank,,0.1,924.4,0.0,stand-in-calibrated,
+overload_req_03,sustained_overload,stand-in,2026-11-10T13:59:41.237612+00:00,1893.9,1959.3,ok,0,756,50,cs600_k4_rerank,,884.6,1074.7,0.0,stand-in-calibrated,
+overload_req_04,sustained_overload,stand-in,2026-11-10T13:59:41.268617+00:00,,1008.3,timeout,0,0,0,cs600_k4_rerank,,0.0,0.0,0.0,stand-in-calibrated,Request spent 1.0s waiting in admission queue and timed out.
+overload_req_05,sustained_overload,stand-in,2026-11-10T13:59:41.316287+00:00,,1007.0,timeout,0,0,0,cs600_k4_rerank,,0.0,0.0,0.0,stand-in-calibrated,Request spent 1.0s waiting in admission queue and timed out.
+overload_req_06,sustained_overload,stand-in,2026-11-10T13:59:41.362508+00:00,,991.7,timeout,0,0,0,cs600_k4_rerank,,0.0,0.0,0.0,stand-in-calibrated,Request spent 1.0s waiting in admission queue and timed out.
+overload_req_07,sustained_overload,stand-in,2026-11-10T13:59:41.409576+00:00,,992.4,timeout,0,0,0,cs600_k4_rerank,,0.0,0.0,0.0,stand-in-calibrated,Request spent 1.0s waiting in admission queue and timed out.
+overload_req_08,sustained_overload,stand-in,2026-11-10T13:59:41.440426+00:00,,992.4,timeout,0,0,0,cs600_k4_rerank,,0.0,0.0,0.0,stand-in-calibrated,Request spent 1.0s waiting in admission queue and timed out.
+overload_req_09,sustained_overload,stand-in,2026-11-10T13:59:41.487530+00:00,,993.4,timeout,0,0,0,cs600_k4_rerank,,0.0,0.0,0.0,stand-in-calibrated,Request spent 1.0s waiting in admission queue and timed out.
+overload_req_10,sustained_overload,stand-in,2026-11-10T13:59:41.534156+00:00,,992.5,timeout,0,0,0,cs600_k4_rerank,,0.0,0.0,0.0,stand-in-calibrated,Request spent 1.0s waiting in admission queue and timed out.
+overload_req_11,sustained_overload,stand-in,2026-11-10T13:59:41.565052+00:00,,0.3,rate_limited,0,0,0,cs600_k4_rerank,,0.0,0.0,0.0,stand-in-calibrated,Admission queue full (8 requests buffered). Please retry later.
+overload_req_12,sustained_overload,stand-in,2026-11-10T13:59:41.611721+00:00,,0.2,rate_limited,0,0,0,cs600_k4_rerank,,0.0,0.0,0.0,stand-in-calibrated,Admission queue full (8 requests buffered). Please retry later.
+overload_req_13,sustained_overload,stand-in,2026-11-10T13:59:41.643632+00:00,,0.2,rate_limited,0,0,0,cs600_k4_rerank,,0.0,0.0,0.0,stand-in-calibrated,Admission queue full (8 requests buffered). Please retry later.
+overload_req_14,sustained_overload,stand-in,2026-11-10T13:59:41.690266+00:00,,0.3,rate_limited,0,0,0,cs600_k4_rerank,,0.0,0.0,0.0,stand-in-calibrated,Admission queue full (8 requests buffered). Please retry later.
+overload_req_15,sustained_overload,stand-in,2026-11-10T13:59:41.720978+00:00,,0.3,rate_limited,0,0,0,cs600_k4_rerank,,0.0,0.0,0.0,stand-in-calibrated,Admission queue full (8 requests buffered). Please retry later.
+overload_req_16,sustained_overload,stand-in,2026-11-10T13:59:41.767424+00:00,,0.3,rate_limited,0,0,0,cs600_k4_rerank,,0.0,0.0,0.0,stand-in-calibrated,Admission queue full (8 requests buffered). Please retry later.
+overload_req_17,sustained_overload,stand-in,2026-11-10T13:59:41.812885+00:00,,0.4,rate_limited,0,0,0,cs600_k4_rerank,,0.0,0.0,0.0,stand-in-calibrated,Admission queue full (8 requests buffered). Please retry later.
+overload_req_18,sustained_overload,stand-in,2026-11-10T13:59:41.843503+00:00,,0.4,rate_limited,0,0,0,cs600_k4_rerank,,0.0,0.0,0.0,stand-in-calibrated,Admission queue full (8 requests buffered). Please retry later.
+overload_req_19,sustained_overload,stand-in,2026-11-10T13:59:41.889420+00:00,,0.3,rate_limited,0,0,0,cs600_k4_rerank,,0.0,0.0,0.0,stand-in-calibrated,Admission queue full (8 requests buffered). Please retry later.
+overload_req_20,sustained_overload,stand-in,2026-11-10T13:59:41.920148+00:00,,0.4,rate_limited,0,0,0,cs600_k4_rerank,,0.0,0.0,0.0,stand-in-calibrated,Admission queue full (8 requests buffered). Please retry later.
+overload_req_21,sustained_overload,stand-in,2026-11-10T13:59:41.967166+00:00,,0.3,rate_limited,0,0,0,cs600_k4_rerank,,0.0,0.0,0.0,stand-in-calibrated,Admission queue full (8 requests buffered). Please retry later.
+overload_req_22,sustained_overload,stand-in,2026-11-10T13:59:41.997918+00:00,,0.3,rate_limited,0,0,0,cs600_k4_rerank,,0.0,0.0,0.0,stand-in-calibrated,Admission queue full (8 requests buffered). Please retry later.
+overload_req_23,sustained_overload,stand-in,2026-11-10T13:59:42.043940+00:00,,0.3,rate_limited,0,0,0,cs600_k4_rerank,,0.0,0.0,0.0,stand-in-calibrated,Admission queue full (8 requests buffered). Please retry later.
+overload_req_24,sustained_overload,stand-in,2026-11-10T13:59:42.074506+00:00,,0.4,rate_limited,0,0,0,cs600_k4_rerank,,0.0,0.0,0.0,stand-in-calibrated,Admission queue full (8 requests buffered). Please retry later.
+overload_req_25,sustained_overload,stand-in,2026-11-10T13:59:42.121215+00:00,,0.3,rate_limited,0,0,0,cs600_k4_rerank,,0.0,0.0,0.0,stand-in-calibrated,Admission queue full (8 requests buffered). Please retry later.
+overload_req_26,sustained_overload,stand-in,2026-11-10T13:59:42.167208+00:00,1775.6,1841.5,ok,0,756,50,cs600_k4_rerank,,764.8,1076.7,0.0,stand-in-calibrated,
+overload_req_27,sustained_overload,stand-in,2026-11-10T13:59:42.198172+00:00,,0.3,rate_limited,0,0,0,cs600_k4_rerank,,0.0,0.0,0.0,stand-in-calibrated,Admission queue full (8 requests buffered). Please retry later.
+overload_req_28,sustained_overload,stand-in,2026-11-10T13:59:42.245334+00:00,,0.4,rate_limited,0,0,0,cs600_k4_rerank,,0.0,0.0,0.0,stand-in-calibrated,Admission queue full (8 requests buffered). Please retry later.
+overload_req_29,sustained_overload,stand-in,2026-11-10T13:59:42.276691+00:00,,0.3,rate_limited,0,0,0,cs600_k4_rerank,,0.0,0.0,0.0,stand-in-calibrated,Admission queue full (8 requests buffered). Please retry later.
+overload_req_30,sustained_overload,stand-in,2026-11-10T13:59:42.322838+00:00,1854.5,1920.0,ok,0,756,50,cs600_k4_rerank,,874.1,1045.9,0.0,stand-in-calibrated,
+overload_req_31,sustained_overload,stand-in,2026-11-10T13:59:42.353675+00:00,,1014.2,timeout,0,0,0,cs600_k4_rerank,,0.0,0.0,0.0,stand-in-calibrated,Request spent 1.0s waiting in admission queue and timed out.
+overload_req_32,sustained_overload,stand-in,2026-11-10T13:59:42.400926+00:00,,1013.2,timeout,0,0,0,cs600_k4_rerank,,0.0,0.0,0.0,stand-in-calibrated,Request spent 1.0s waiting in admission queue and timed out.
+overload_req_33,sustained_overload,stand-in,2026-11-10T13:59:42.432459+00:00,,982.3,timeout,0,0,0,cs600_k4_rerank,,0.0,0.0,0.0,stand-in-calibrated,Request spent 1.0s waiting in admission queue and timed out.
+overload_req_34,sustained_overload,stand-in,2026-11-10T13:59:42.479932+00:00,,996.7,timeout,0,0,0,cs600_k4_rerank,,0.0,0.0,0.0,stand-in-calibrated,Request spent 1.0s waiting in admission queue and timed out.
+overload_req_35,sustained_overload,stand-in,2026-11-10T13:59:42.526673+00:00,,1011.9,timeout,0,0,0,cs600_k4_rerank,,0.0,0.0,0.0,stand-in-calibrated,Request spent 1.0s waiting in admission queue and timed out.
+overload_req_36,sustained_overload,stand-in,2026-11-10T13:59:42.557540+00:00,,981.3,timeout,0,0,0,cs600_k4_rerank,,0.0,0.0,0.0,stand-in-calibrated,Request spent 1.0s waiting in admission queue and timed out.
+overload_req_37,sustained_overload,stand-in,2026-11-10T13:59:42.603473+00:00,,0.4,rate_limited,0,0,0,cs600_k4_rerank,,0.0,0.0,0.0,stand-in-calibrated,Admission queue full (8 requests buffered). Please retry later.
+overload_req_38,sustained_overload,stand-in,2026-11-10T13:59:42.634205+00:00,,0.2,rate_limited,0,0,0,cs600_k4_rerank,,0.0,0.0,0.0,stand-in-calibrated,Admission queue full (8 requests buffered). Please retry later.
+overload_req_39,sustained_overload,stand-in,2026-11-10T13:59:42.680815+00:00,,0.2,rate_limited,0,0,0,cs600_k4_rerank,,0.0,0.0,0.0,stand-in-calibrated,Admission queue full (8 requests buffered). Please retry later.
+overload_req_40,sustained_overload,stand-in,2026-11-10T13:59:42.712482+00:00,,0.2,rate_limited,0,0,0,cs600_k4_rerank,,0.0,0.0,0.0,stand-in-calibrated,Admission queue full (8 requests buffered). Please retry later.
+halved_req_01,per_minute_limit_halved,stand-in,2026-11-10T13:59:51.203103+00:00,842.7,939.2,ok,0,780,38,cs600_k4_rerank,,0.1,939.1,0.0,stand-in-calibrated,
+halved_req_02,per_minute_limit_halved,stand-in,2026-11-10T13:59:52.948780+00:00,868.7,920.9,ok,0,780,38,cs600_k4_rerank,,0.1,920.8,0.0,stand-in-calibrated,
+halved_req_03,per_minute_limit_halved,stand-in,2026-11-10T13:59:54.679442+00:00,860.8,913.0,ok,0,780,38,cs600_k4_rerank,,0.1,912.8,0.0,stand-in-calibrated,
+halved_req_04,per_minute_limit_halved,stand-in,2026-11-10T13:59:56.400748+00:00,897.1,960.6,ok,0,780,38,cs600_k4_rerank,,0.1,960.4,0.0,stand-in-calibrated,
+halved_req_05,per_minute_limit_halved,stand-in,2026-11-10T13:59:58.171073+00:00,,5.2,rate_limited,0,780,0,cs600_k4_rerank,,0.1,5.1,0.0,stand-in-calibrated,Provider call failed: HTTP 429 (rate_limit_exceeded)
+halved_req_06,per_minute_limit_halved,stand-in,2026-11-10T13:59:58.979249+00:00,,5.2,rate_limited,0,780,0,cs600_k4_rerank,,0.1,5.1,0.0,stand-in-calibrated,Provider call failed: HTTP 429 (rate_limit_exceeded)
+halved_req_07,per_minute_limit_halved,stand-in,2026-11-10T13:59:59.792162+00:00,,6.7,rate_limited,0,780,0,cs600_k4_rerank,,0.1,6.6,0.0,stand-in-calibrated,Provider call failed: HTTP 429 (rate_limit_exceeded)
+halved_req_08,per_minute_limit_halved,stand-in,2026-11-10T14:00:00.600624+00:00,,5.4,rate_limited,0,780,0,cs600_k4_rerank,,0.1,5.2,0.0,stand-in-calibrated,Provider call failed: HTTP 429 (rate_limit_exceeded)
+halved_req_09,per_minute_limit_halved,stand-in,2026-11-10T14:00:01.407528+00:00,,5.8,rate_limited,0,780,0,cs600_k4_rerank,,0.2,5.6,0.0,stand-in-calibrated,Provider call failed: HTTP 429 (rate_limit_exceeded)
+halved_req_10,per_minute_limit_halved,stand-in,2026-11-10T14:00:02.218653+00:00,,6.1,rate_limited,0,780,0,cs600_k4_rerank,,0.1,5.9,0.0,stand-in-calibrated,Provider call failed: HTTP 429 (rate_limit_exceeded)
+halved_req_11,per_minute_limit_halved,stand-in,2026-11-10T14:00:03.022603+00:00,,6.4,rate_limited,0,780,0,cs600_k4_rerank,,0.2,6.3,0.0,stand-in-calibrated,Provider call failed: HTTP 429 (rate_limit_exceeded)
+halved_req_12,per_minute_limit_halved,stand-in,2026-11-10T14:00:03.837647+00:00,,6.9,rate_limited,0,780,0,cs600_k4_rerank,,0.2,6.8,0.0,stand-in-calibrated,Provider call failed: HTTP 429 (rate_limit_exceeded)
+halved_req_13,per_minute_limit_halved,stand-in,2026-11-10T14:00:04.648094+00:00,,4.9,rate_limited,0,780,0,cs600_k4_rerank,,0.2,4.7,0.0,stand-in-calibrated,Provider call failed: HTTP 429 (rate_limit_exceeded)
+halved_req_14,per_minute_limit_halved,stand-in,2026-11-10T14:00:05.469583+00:00,,6.8,rate_limited,0,780,0,cs600_k4_rerank,,0.2,6.6,0.0,stand-in-calibrated,Provider call failed: HTTP 429 (rate_limit_exceeded)
+halved_req_15,per_minute_limit_halved,stand-in,2026-11-10T14:00:06.284048+00:00,,7.2,rate_limited,0,780,0,cs600_k4_rerank,,0.2,7.0,0.0,stand-in-calibrated,Provider call failed: HTTP 429 (rate_limit_exceeded)
+halved_req_16,per_minute_limit_halved,stand-in,2026-11-10T14:00:07.105081+00:00,,5.9,rate_limited,0,780,0,cs600_k4_rerank,,0.2,5.7,0.0,stand-in-calibrated,Provider call failed: HTTP 429 (rate_limit_exceeded)
+halved_req_17,per_minute_limit_halved,stand-in,2026-11-10T14:00:07.906501+00:00,,4.1,rate_limited,0,780,0,cs600_k4_rerank,,0.1,4.1,0.0,stand-in-calibrated,Provider call failed: HTTP 429 (rate_limit_exceeded)
+halved_req_18,per_minute_limit_halved,stand-in,2026-11-10T14:00:08.713243+00:00,,4.2,rate_limited,0,780,0,cs600_k4_rerank,,0.1,4.1,0.0,stand-in-calibrated,Provider call failed: HTTP 429 (rate_limit_exceeded)
+halved_req_19,per_minute_limit_halved,stand-in,2026-11-10T14:00:09.531955+00:00,,4.2,rate_limited,0,780,0,cs600_k4_rerank,,0.1,4.2,0.0,stand-in-calibrated,Provider call failed: HTTP 429 (rate_limit_exceeded)
+halved_req_20,per_minute_limit_halved,stand-in,2026-11-10T14:00:10.338335+00:00,,5.3,rate_limited,0,780,0,cs600_k4_rerank,,0.1,5.2,0.0,stand-in-calibrated,Provider call failed: HTTP 429 (rate_limit_exceeded)
+halved_req_21,per_minute_limit_halved,stand-in,2026-11-10T14:00:11.149302+00:00,,5.9,rate_limited,0,780,0,cs600_k4_rerank,,0.1,5.9,0.0,stand-in-calibrated,Provider call failed: HTTP 429 (rate_limit_exceeded)
+halved_req_22,per_minute_limit_halved,stand-in,2026-11-10T14:00:11.967868+00:00,,4.2,rate_limited,0,780,0,cs600_k4_rerank,,0.1,4.1,0.0,stand-in-calibrated,Provider call failed: HTTP 429 (rate_limit_exceeded)
+halved_req_23,per_minute_limit_halved,stand-in,2026-11-10T14:00:12.773245+00:00,,5.4,rate_limited,0,780,0,cs600_k4_rerank,,0.1,5.3,0.0,stand-in-calibrated,Provider call failed: HTTP 429 (rate_limit_exceeded)
+halved_req_24,per_minute_limit_halved,stand-in,2026-11-10T14:00:13.581009+00:00,,4.5,rate_limited,0,780,0,cs600_k4_rerank,,0.1,4.5,0.0,stand-in-calibrated,Provider call failed: HTTP 429 (rate_limit_exceeded)
+halved_req_25,per_minute_limit_halved,stand-in,2026-11-10T14:00:14.393630+00:00,,5.5,rate_limited,0,780,0,cs600_k4_rerank,,0.1,5.4,0.0,stand-in-calibrated,Provider call failed: HTTP 429 (rate_limit_exceeded)
+daily_exhaust_req_01,daily_budget_exhausted,stand-in,2026-11-10T14:00:26.536872+00:00,848.0,1025.4,ok,0,896,51,cs600_k4_rerank,,0.1,1025.2,0.0,stand-in-calibrated,
+daily_exhaust_req_02,daily_budget_exhausted,stand-in,2026-11-10T14:00:27.613538+00:00,834.3,898.5,ok,0,896,51,cs600_k4_rerank,,0.1,898.4,0.0,stand-in-calibrated,
+daily_exhaust_req_03,daily_budget_exhausted,stand-in,2026-11-10T14:00:28.577324+00:00,869.3,937.3,ok,0,896,51,cs600_k4_rerank,,0.1,937.2,0.0,stand-in-calibrated,
+daily_exhaust_req_04,daily_budget_exhausted,stand-in,2026-11-10T14:00:29.577736+00:00,866.0,933.5,ok,0,896,51,cs600_k4_rerank,,0.1,933.4,0.0,stand-in-calibrated,
+daily_exhaust_req_05,daily_budget_exhausted,stand-in,2026-11-10T14:00:30.574266+00:00,883.9,950.1,ok,0,896,51,cs600_k4_rerank,,0.1,949.9,0.0,stand-in-calibrated,
+daily_exhaust_req_06,daily_budget_exhausted,stand-in,2026-11-10T14:00:31.588518+00:00,,0.2,rate_limited,0,0,0,cs600_k4_rerank,,0.1,0.0,0.0,stand-in-calibrated,Daily request quota exhausted (RPD limit reached).
+daily_exhaust_req_07,daily_budget_exhausted,stand-in,2026-11-10T14:00:31.646988+00:00,,0.2,rate_limited,0,0,0,cs600_k4_rerank,,0.1,0.0,0.0,stand-in-calibrated,Daily request quota exhausted (RPD limit reached).
+daily_exhaust_req_08,daily_budget_exhausted,stand-in,2026-11-10T14:00:31.698434+00:00,,0.2,rate_limited,0,0,0,cs600_k4_rerank,,0.1,0.0,0.0,stand-in-calibrated,Daily request quota exhausted (RPD limit reached).
+daily_exhaust_req_09,daily_budget_exhausted,stand-in,2026-11-10T14:00:31.763535+00:00,,0.2,rate_limited,0,0,0,cs600_k4_rerank,,0.1,0.0,0.0,stand-in-calibrated,Daily request quota exhausted (RPD limit reached).
+daily_exhaust_req_10,daily_budget_exhausted,stand-in,2026-11-10T14:00:31.815209+00:00,,0.2,rate_limited,0,0,0,cs600_k4_rerank,,0.1,0.0,0.0,stand-in-calibrated,Daily request quota exhausted (RPD limit reached).
+daily_exhaust_req_11,daily_budget_exhausted,stand-in,2026-11-10T14:00:31.880687+00:00,,0.1,rate_limited,0,0,0,cs600_k4_rerank,,0.1,0.0,0.0,stand-in-calibrated,Daily request quota exhausted (RPD limit reached).
+daily_exhaust_req_12,daily_budget_exhausted,stand-in,2026-11-10T14:00:31.946640+00:00,,0.1,rate_limited,0,0,0,cs600_k4_rerank,,0.1,0.0,0.0,stand-in-calibrated,Daily request quota exhausted (RPD limit reached).
+daily_exhaust_req_13,daily_budget_exhausted,stand-in,2026-11-10T14:00:31.997748+00:00,,0.1,rate_limited,0,0,0,cs600_k4_rerank,,0.1,0.0,0.0,stand-in-calibrated,Daily request quota exhausted (RPD limit reached).
+daily_exhaust_req_14,daily_budget_exhausted,stand-in,2026-11-10T14:00:32.062978+00:00,,0.1,rate_limited,0,0,0,cs600_k4_rerank,,0.1,0.0,0.0,stand-in-calibrated,Daily request quota exhausted (RPD limit reached).
+daily_exhaust_req_15,daily_budget_exhausted,stand-in,2026-11-10T14:00:32.114490+00:00,,0.2,rate_limited,0,0,0,cs600_k4_rerank,,0.1,0.0,0.0,stand-in-calibrated,Daily request quota exhausted (RPD limit reached).
+daily_exhaust_req_16,daily_budget_exhausted,stand-in,2026-11-10T14:00:32.178976+00:00,,0.1,rate_limited,0,0,0,cs600_k4_rerank,,0.1,0.0,0.0,stand-in-calibrated,Daily request quota exhausted (RPD limit reached).
+daily_exhaust_req_17,daily_budget_exhausted,stand-in,2026-11-10T14:00:32.244946+00:00,,0.1,rate_limited,0,0,0,cs600_k4_rerank,,0.1,0.0,0.0,stand-in-calibrated,Daily request quota exhausted (RPD limit reached).
+daily_exhaust_req_18,daily_budget_exhausted,stand-in,2026-11-10T14:00:32.308416+00:00,,0.1,rate_limited,0,0,0,cs600_k4_rerank,,0.1,0.0,0.0,stand-in-calibrated,Daily request quota exhausted (RPD limit reached).
+daily_exhaust_req_19,daily_budget_exhausted,stand-in,2026-11-10T14:00:32.371611+00:00,,0.1,rate_limited,0,0,0,cs600_k4_rerank,,0.1,0.0,0.0,stand-in-calibrated,Daily request quota exhausted (RPD limit reached).
+daily_exhaust_req_20,daily_budget_exhausted,stand-in,2026-11-10T14:00:32.432402+00:00,,0.1,rate_limited,0,0,0,cs600_k4_rerank,,0.1,0.0,0.0,stand-in-calibrated,Daily request quota exhausted (RPD limit reached).

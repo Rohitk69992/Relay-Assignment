@@ -1,59 +1,77 @@
 [
   {
     "probe_id": "real_groq_probe_01",
-    "timestamp_utc": "2026-11-10T13:23:25.358154+00:00",
+    "timestamp_utc": "2026-11-10T13:53:39.586331+00:00",
     "target_url": "https://api.groq.com/openai/v1/chat/completions",
     "model": "openai/gpt-oss-20b",
-    "http_status": 401,
-    "ttft_ms": null,
-    "total_ms": 1244.6165000001201,
-    "tokens_in": 0,
-    "tokens_out": 0,
+    "http_status": 200,
+    "ttft_ms": 884.7982000006596,
+    "total_ms": 988.4130000064033,
+    "tokens_in": 98,
+    "tokens_out": 90,
     "response_headers": {
-      "date": "Tue, 10 Nov 2026 13:23:27 GMT",
+      "date": "Tue, 10 Nov 2026 13:53:41 GMT",
       "server": "cloudflare",
-      "cf-ray": "a5855f31ec2cd8ea-BOM"
+      "x-ratelimit-limit-requests": "1000",
+      "x-ratelimit-limit-tokens": "8000",
+      "x-ratelimit-remaining-requests": "992",
+      "x-ratelimit-remaining-tokens": "7752",
+      "x-ratelimit-reset-requests": "11m31.2s",
+      "x-ratelimit-reset-tokens": "1.859s",
+      "cf-ray": "a5858b77fd117e3a-BOM"
     },
-    "authenticated": false,
-    "response_snippet": "{\"error\":{\"message\":\"Invalid API Key\",\"type\":\"invalid_request_error\",\"code\":\"invalid_api_key\"}}\n",
-    "error_detail": "{\"error\":{\"message\":\"Invalid API Key\",\"type\":\"invalid_request_error\",\"code\":\"invalid_api_key\"}}\n"
+    "authenticated": true,
+    "response_snippet": "The user asks: \"State the number of attention heads in the base Transformer from Attention Is All You Need.\" The base Tr",
+    "error_detail": null
   },
   {
     "probe_id": "real_groq_probe_02",
-    "timestamp_utc": "2026-11-10T13:23:27.607882+00:00",
+    "timestamp_utc": "2026-11-10T13:53:41.586656+00:00",
     "target_url": "https://api.groq.com/openai/v1/chat/completions",
     "model": "openai/gpt-oss-20b",
-    "http_status": 401,
-    "ttft_ms": null,
-    "total_ms": 333.68049999990035,
-    "tokens_in": 0,
-    "tokens_out": 0,
+    "http_status": 200,
+    "ttft_ms": 774.5962999979383,
+    "total_ms": 949.5413999975426,
+    "tokens_in": 96,
+    "tokens_out": 150,
     "response_headers": {
-      "date": "Tue, 10 Nov 2026 13:23:29 GMT",
+      "date": "Tue, 10 Nov 2026 13:53:43 GMT",
       "server": "cloudflare",
-      "cf-ray": "a5855f3a3a1a4811-BOM"
+      "x-ratelimit-limit-requests": "1000",
+      "x-ratelimit-limit-tokens": "8000",
+      "x-ratelimit-remaining-requests": "991",
+      "x-ratelimit-remaining-tokens": "7754",
+      "x-ratelimit-reset-requests": "12m57.599s",
+      "x-ratelimit-reset-tokens": "1.845s",
+      "cf-ray": "a5858b83df0dff69-BOM"
     },
-    "authenticated": false,
-    "response_snippet": "{\"error\":{\"message\":\"Invalid API Key\",\"type\":\"invalid_request_error\",\"code\":\"invalid_api_key\"}}\n",
-    "error_detail": "{\"error\":{\"message\":\"Invalid API Key\",\"type\":\"invalid_request_error\",\"code\":\"invalid_api_key\"}}\n"
+    "authenticated": true,
+    "response_snippet": "We need to answer: \"What is the framerate of the Mimi neural audio codec in Moshi?\" This seems like a specific technical",
+    "error_detail": null
   },
   {
     "probe_id": "real_groq_probe_03",
-    "timestamp_utc": "2026-11-10T13:23:28.951805+00:00",
+    "timestamp_utc": "2026-11-10T13:53:43.543803+00:00",
     "target_url": "https://api.groq.com/openai/v1/chat/completions",
     "model": "openai/gpt-oss-20b",
-    "http_status": 401,
-    "ttft_ms": null,
-    "total_ms": 386.34380000439705,
-    "tokens_in": 0,
-    "tokens_out": 0,
+    "http_status": 200,
+    "ttft_ms": 858.1465999959619,
+    "total_ms": 1018.7927999941166,
+    "tokens_in": 92,
+    "tokens_out": 150,
     "response_headers": {
-      "date": "Tue, 10 Nov 2026 13:23:30 GMT",
+      "date": "Tue, 10 Nov 2026 13:53:45 GMT",
       "server": "cloudflare",
-      "cf-ray": "a5855f42ff19252e-BOM"
+      "x-ratelimit-limit-requests": "1000",
+      "x-ratelimit-limit-tokens": "8000",
+      "x-ratelimit-remaining-requests": "990",
+      "x-ratelimit-remaining-tokens": "7758",
+      "x-ratelimit-reset-requests": "14m24s",
+      "x-ratelimit-reset-tokens": "1.815s",
+      "cf-ray": "a5858b8fd9592e56-BOM"
     },
-    "authenticated": false,
-    "response_snippet": "{\"error\":{\"message\":\"Invalid API Key\",\"type\":\"invalid_request_error\",\"code\":\"invalid_api_key\"}}\n",
-    "error_detail": "{\"error\":{\"message\":\"Invalid API Key\",\"type\":\"invalid_request_error\",\"code\":\"invalid_api_key\"}}\n"
+    "authenticated": true,
+    "response_snippet": "We need to explain what predicts boundaries between chunks in Dynamic Chunking. Likely referring to a computational mode",
+    "error_detail": null
   }
 ]

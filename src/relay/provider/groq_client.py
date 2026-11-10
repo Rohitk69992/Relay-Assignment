@@ -86,7 +86,8 @@ class GroqProvider(ModelProviderBase):
                 )
 
             data = response.json()
-            content = data.get("choices", [{}])[0].get("message", {}).get("content", "")
+            choice = data.get("choices", [{}])[0].get("message", {})
+            content = choice.get("content") or choice.get("reasoning") or ""
             usage = data.get("usage", {})
             tokens_in = usage.get("prompt_tokens", 0)
             tokens_out = usage.get("completion_tokens", 0)
@@ -147,7 +148,7 @@ class GroqProvider(ModelProviderBase):
                         try:
                             chunk_data = json.loads(data_str)
                             delta = chunk_data.get("choices", [{}])[0].get("delta", {})
-                            token = delta.get("content", "")
+                            token = delta.get("content") or delta.get("reasoning") or ""
                             if token:
                                 yield token
                         except Exception:

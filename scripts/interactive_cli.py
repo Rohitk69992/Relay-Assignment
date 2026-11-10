@@ -35,7 +35,7 @@ async def main():
         source = SourceType.REAL
         print(f"Provider: REAL GROQ API (Model: {provider.model})")
     else:
-        provider = StandInProvider(p50_latency_ms=120.0, p95_latency_ms=280.0, tokens_per_sec=800.0)
+        provider = StandInProvider()
         source = SourceType.STANDIN
         print("Provider: CALIBRATED STAND-IN SIMULATOR (LPU Latency Model)")
 

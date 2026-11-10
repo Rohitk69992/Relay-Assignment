@@ -57,8 +57,11 @@ async def run_single_probe(
         ],
         "max_tokens": 150,
         "temperature": 0.0,
-        "stream": stream
+        "stream": stream,
+        "stream_options": {"include_usage": True} if stream else None
     }
+    if not stream:
+        payload.pop("stream_options", None)
 
     timestamp = datetime.now(timezone.utc).isoformat()
     timer = MonotonicTimer()
@@ -87,8 +90,12 @@ async def run_single_probe(
                                     break
                                 try:
                                     chunk = json.loads(data_str)
+                                    if "usage" in chunk and chunk["usage"]:
+                                        u = chunk["usage"]
+                                        tokens_in = u.get("prompt_tokens", tokens_in)
+                                        tokens_out = u.get("completion_tokens", tokens_out)
                                     delta = chunk.get("choices", [{}])[0].get("delta", {})
-                                    tok = delta.get("content", "")
+                                    tok = delta.get("content") or delta.get("reasoning") or ""
                                     if tok:
                                         if ttft_ms is None:
                                             ttft_ms = timer.mark_first_token()
