@@ -1,0 +1,21 @@
+{
+  "profile_name": "calibrated-openai-gpt-oss-20b",
+  "target_model": "openai/gpt-oss-20b",
+  "source_description": "Groq LPU empirical observations and published system architecture specs",
+  "sample_count": 500,
+  "p50_target_ms": 115.0,
+  "p95_target_ms": 260.0,
+  "mu": 4.744932,
+  "sigma": 0.49594,
+  "tokens_per_second": 850.0,
+  "validation_sample_p50_ms": 114.28,
+  "validation_sample_p95_ms": 265.78,
+  "validation_error_p50_pct": 0.62,
+  "validation_error_p95_pct": 2.22,
+  "assumptions_and_limitations": [
+    "Fitted log-normal TTFT accurately models LPU core processing time and SRAM tensor-pipeline latency.",
+    "Limitation: Does not model WAN TCP/TLS handshake jitter across public internet transit providers.",
+    "Limitation: Does not model multi-tenant scheduling contention or noisy-neighbor queue cliffs.",
+    "Limitation: Assumes uniform token-generation rate; real LPUs exhibit sub-millisecond per-token timing with minor memory-bandwidth variation."
+  ]
+}

@@ -137,20 +137,44 @@ async def chat_completions(req: ChatCompletionRequest):
         }
     else:
         async def event_generator() -> AsyncIterator[str]:
-            resp = await orchestrator.execute_request(pipeline_req)
-            # Yield tokens as SSE
-            words = resp.answer.split(" ")
-            for w in words:
-                chunk_data = {
-                    "id": req_id,
-                    "object": "chat.completion.chunk",
-                    "choices": [{
-                        "index": 0,
-                        "delta": {"content": w + " "},
-                        "finish_reason": None
-                    }]
-                }
-                yield f"data: {json.dumps(chunk_data)}\n\n"
+            async for chunk in orchestrator.execute_stream_request(pipeline_req):
+                if chunk["event"] == "token":
+                    chunk_data = {
+                        "id": req_id,
+                        "object": "chat.completion.chunk",
+                        "choices": [{
+                            "index": 0,
+                            "delta": {"content": chunk["content"]},
+                            "finish_reason": None
+                        }],
+                        "relay_telemetry": {
+                            "first_token_ms": chunk.get("first_token_ms")
+                        }
+                    }
+                    yield f"data: {json.dumps(chunk_data)}\n\n"
+                elif chunk["event"] == "done":
+                    meta_data = {
+                        "id": req_id,
+                        "object": "chat.completion.chunk",
+                        "choices": [{
+                            "index": 0,
+                            "delta": {},
+                            "finish_reason": "stop"
+                        }],
+                        "relay_telemetry": {
+                            "first_token_ms": chunk.get("first_token_ms"),
+                            "total_ms": chunk.get("total_ms"),
+                            "citations": chunk.get("citations", []),
+                            "verified": chunk.get("verified", True)
+                        }
+                    }
+                    yield f"data: {json.dumps(meta_data)}\n\n"
+                elif chunk["event"] == "error":
+                    err_data = {
+                        "error": chunk.get("error"),
+                        "status": chunk.get("status")
+                    }
+                    yield f"data: {json.dumps(err_data)}\n\n"
             yield "data: [DONE]\n\n"
 
         return StreamingResponse(event_generator(), media_type="text/event-stream")

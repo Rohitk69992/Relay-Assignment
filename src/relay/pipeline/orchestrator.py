@@ -3,7 +3,7 @@
 import asyncio
 import time
 from datetime import datetime, timezone
-from typing import AsyncIterator, Optional, Tuple
+from typing import Any, AsyncIterator, Dict, List, Optional, Tuple
 from src.relay.config import ProviderMode, settings
 from src.relay.logging_setup import MonotonicTimer, get_logger
 from src.relay.pipeline.generator import AnswerGenerator, SYSTEM_PROMPT
@@ -55,12 +55,9 @@ class PipelineOrchestrator:
 
     async def execute_request(
         self,
-        request: PipelineRequest,
-        expected_answerable: Optional[bool] = None,
-        expected_paper_id: Optional[str] = None,
-        expected_page: Optional[int] = None
+        request: PipelineRequest
     ) -> PipelineResponse:
-        """Executes full pipeline for a user request."""
+        """Executes full pipeline for a user request without receiving ground-truth evaluation labels."""
         req_start_wall = datetime.now(timezone.utc).isoformat()
         total_timer = MonotonicTimer()
         queue_wait_ms = 0.0
@@ -80,7 +77,7 @@ class PipelineOrchestrator:
                 start_time=req_start_wall,
                 answer="",
                 status=RequestStatus.RATE_LIMITED,
-                answer_grade=AnswerGrade.WRONG,
+                answer_grade=None,
                 first_token_ms=None,
                 total_ms=total_ms,
                 queue_wait_ms=0.0,
@@ -100,7 +97,7 @@ class PipelineOrchestrator:
                 start_time=req_start_wall,
                 answer="",
                 status=RequestStatus.TIMEOUT,
-                answer_grade=AnswerGrade.WRONG,
+                answer_grade=None,
                 first_token_ms=None,
                 total_ms=total_ms,
                 queue_wait_ms=queue_wait_ms,
@@ -125,7 +122,7 @@ class PipelineOrchestrator:
                         start_time=req_start_wall,
                         answer="System notice: Daily API request/token budget is completely exhausted. Resets at 00:00 UTC.",
                         status=RequestStatus.RATE_LIMITED,
-                        answer_grade=AnswerGrade.WRONG,
+                        answer_grade=None,
                         first_token_ms=None,
                         total_ms=total_ms,
                         queue_wait_ms=queue_wait_ms,
@@ -159,7 +156,7 @@ class PipelineOrchestrator:
                     start_time=req_start_wall,
                     answer=refusal_msg,
                     status=RequestStatus.OK,
-                    answer_grade=AnswerGrade.REFUSED_CORRECTLY if expected_answerable is False else AnswerGrade.WRONG,
+                    answer_grade=None,
                     first_token_ms=queue_wait_ms + 10.0,
                     total_ms=total_ms,
                     queue_wait_ms=queue_wait_ms,
@@ -192,6 +189,36 @@ class PipelineOrchestrator:
                 )
                 chunks = refined_result.chunks
                 retrieval_result.refinement_performed = True
+                is_sufficient, _, _ = self.sufficiency_evaluator.evaluate(
+                    query_plan=query_plan,
+                    chunks=chunks,
+                    refinement_count=1
+                )
+
+            # Check if evidence is still insufficient (e.g. key terms completely absent)
+            if not is_sufficient or not chunks:
+                refusal_msg = (
+                    "REFUSAL: The supplied research library does not establish the answer to this question. "
+                    "The ingested papers do not contain sufficient evidence on this topic."
+                )
+                total_ms = total_timer.mark_complete()
+                return PipelineResponse(
+                    request_id=request.request_id,
+                    scenario=request.scenario,
+                    source=request.source,
+                    start_time=req_start_wall,
+                    answer=refusal_msg,
+                    status=RequestStatus.OK,
+                    answer_grade=None,
+                    first_token_ms=queue_wait_ms + 15.0,
+                    total_ms=total_ms,
+                    queue_wait_ms=queue_wait_ms,
+                    processing_ms=total_ms - queue_wait_ms,
+                    retries=0,
+                    tokens_in=max(10, len(request.question) // 4),
+                    tokens_out=25,
+                    retrieval_setting=request.retrieval_setting.label
+                )
 
             # STAGE 6: Answer Generation via Model Provider with Retry Management
             user_prompt = AnswerGenerator.build_user_prompt(request.question, chunks)
@@ -203,17 +230,11 @@ class PipelineOrchestrator:
             while True:
                 # Dispatch to provider
                 if isinstance(self.provider, StandInProvider):
-                    is_known_unanswerable = (expected_answerable is False) or (len(chunks) == 0)
-                    if is_known_unanswerable:
-                        standin_text = AnswerGenerator.build_standin_answer(request.question, chunks, is_refusal=True)
-                    else:
-                        standin_text = AnswerGenerator.build_standin_answer(request.question, chunks, is_refusal=False)
-                    # Use stand-in simulation
+                    standin_text = AnswerGenerator.build_standin_answer(request.question, chunks, is_refusal=False)
                     provider_resp = await self.provider.generate(
                         prompt=user_prompt,
                         system_prompt=SYSTEM_PROMPT
                     )
-                    # If simulation succeeded, inject grounded standin_text
                     if provider_resp.http_status == 200:
                         provider_resp.content = standin_text
                 else:
@@ -244,7 +265,6 @@ class PipelineOrchestrator:
                     await asyncio.sleep(delay_s)
                     continue
                 else:
-                    # Failure cannot be retried
                     status = RequestStatus.RATE_LIMITED if provider_resp.http_status == 429 else RequestStatus.ERROR
                     total_ms = total_timer.mark_complete()
                     return PipelineResponse(
@@ -254,7 +274,7 @@ class PipelineOrchestrator:
                         start_time=req_start_wall,
                         answer="",
                         status=status,
-                        answer_grade=AnswerGrade.WRONG,
+                        answer_grade=None,
                         first_token_ms=None,
                         total_ms=total_ms,
                         queue_wait_ms=queue_wait_ms,
@@ -269,12 +289,9 @@ class PipelineOrchestrator:
 
             # STAGE 7: Response Verification & Citation Auditing
             generated_answer = provider_resp.content
-            answer_grade, citations, audit_note = self.verifier.verify(
+            is_grounded, citations, is_refusal, audit_note = self.verifier.verify_grounding(
                 answer=generated_answer,
-                retrieved_chunks=chunks,
-                is_known_answerable=expected_answerable,
-                expected_paper_id=expected_paper_id,
-                expected_page=expected_page
+                retrieved_chunks=chunks
             )
 
             total_ms = total_timer.mark_complete()
@@ -288,7 +305,7 @@ class PipelineOrchestrator:
                 answer=generated_answer,
                 citations=citations,
                 status=RequestStatus.OK,
-                answer_grade=answer_grade,
+                answer_grade=None,
                 first_token_ms=first_token_ms,
                 total_ms=total_ms,
                 queue_wait_ms=queue_wait_ms,
@@ -300,6 +317,96 @@ class PipelineOrchestrator:
                 retrieval_setting=request.retrieval_setting.label,
                 error_message=None
             )
+
+        finally:
+            self.queue_mgr.release_execution_slot()
+
+    async def execute_stream_request(
+        self,
+        request: PipelineRequest
+    ) -> AsyncIterator[Dict[str, Any]]:
+        """Executes full pipeline streaming tokens in real time via Server-Sent Events."""
+        total_timer = MonotonicTimer()
+        queue_wait_ms = 0.0
+
+        try:
+            enqueue_time = await self.queue_mgr.enter_queue(request.request_id)
+            queue_wait_ms = await self.queue_mgr.acquire_execution_slot(request.request_id, enqueue_time)
+        except QueueFullError as e:
+            yield {
+                "event": "error",
+                "status": 429,
+                "error": str(e),
+                "total_ms": total_timer.mark_complete()
+            }
+            return
+        except QueueTimeoutError as e:
+            yield {
+                "event": "error",
+                "status": 504,
+                "error": str(e),
+                "total_ms": total_timer.mark_complete()
+            }
+            return
+
+        try:
+            # Query planning & off-topic check
+            query_plan = self.intent_planner.plan_query(request.question)
+            if query_plan.is_off_topic:
+                refusal_msg = (
+                    "REFUSAL: The supplied research library does not establish the answer to this question. "
+                    "The topic is outside the scope of the ingested research papers."
+                )
+                yield {"event": "token", "content": refusal_msg, "first_token_ms": queue_wait_ms + 10.0}
+                yield {"event": "done", "total_ms": total_timer.mark_complete(), "citations": [], "verified": True}
+                return
+
+            # Retrieval tool
+            retrieval_result = self.retriever.retrieve(query_plan.original_query, request.retrieval_setting)
+            chunks = retrieval_result.chunks
+
+            # Sufficiency check
+            is_sufficient, refined_query, _ = self.sufficiency_evaluator.evaluate(query_plan, chunks, refinement_count=0)
+            if not is_sufficient and refined_query != query_plan.original_query:
+                refined_result = self.retriever.retrieve(refined_query, request.retrieval_setting)
+                chunks = refined_result.chunks
+                is_sufficient, _, _ = self.sufficiency_evaluator.evaluate(query_plan, chunks, refinement_count=1)
+
+            if not is_sufficient or not chunks:
+                refusal_msg = (
+                    "REFUSAL: The supplied research library does not establish the answer to this question. "
+                    "The ingested papers do not contain sufficient evidence on this topic."
+                )
+                yield {"event": "token", "content": refusal_msg, "first_token_ms": queue_wait_ms + 15.0}
+                yield {"event": "done", "total_ms": total_timer.mark_complete(), "citations": [], "verified": True}
+                return
+
+            # Grounded generation streaming
+            user_prompt = AnswerGenerator.build_user_prompt(request.question, chunks)
+            first_token_ms = None
+            accumulated_tokens = []
+
+            # Stream from provider
+            async for token_chunk in self.provider.stream_generate(user_prompt, system_prompt=SYSTEM_PROMPT):
+                if first_token_ms is None:
+                    first_token_ms = queue_wait_ms + total_timer.elapsed_ms
+                accumulated_tokens.append(token_chunk)
+                yield {
+                    "event": "token",
+                    "content": token_chunk,
+                    "first_token_ms": first_token_ms
+                }
+
+            full_answer = "".join(accumulated_tokens)
+            is_grounded, citations, _, _ = self.verifier.verify_grounding(full_answer, chunks)
+
+            yield {
+                "event": "done",
+                "first_token_ms": first_token_ms,
+                "total_ms": total_timer.mark_complete(),
+                "citations": [c.model_dump() for c in citations],
+                "verified": is_grounded
+            }
 
         finally:
             self.queue_mgr.release_execution_slot()

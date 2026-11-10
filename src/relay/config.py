@@ -41,21 +41,21 @@ class Settings(BaseSettings):
         description="Base URL for Groq API"
     )
     GROQ_MODEL: str = Field(
-        default="llama-3.1-8b-instant",
-        description="Active model identifier on Groq"
+        default="openai/gpt-oss-20b",
+        description="Active model identifier on Groq (llama-3.1-8b-instant was deprecated August 2026)"
     )
 
     # Stand-in Simulation Parameters
-    STANDIN_P50_LATENCY_MS: float = Field(default=350.0, ge=10.0, le=10000.0)
-    STANDIN_P95_LATENCY_MS: float = Field(default=850.0, ge=20.0, le=20000.0)
-    STANDIN_TOKENS_PER_SECOND: float = Field(default=450.0, ge=10.0, le=2000.0)
+    STANDIN_P50_LATENCY_MS: float = Field(default=115.0, ge=10.0, le=10000.0)
+    STANDIN_P95_LATENCY_MS: float = Field(default=260.0, ge=20.0, le=20000.0)
+    STANDIN_TOKENS_PER_SECOND: float = Field(default=850.0, ge=10.0, le=2000.0)
     STANDIN_FAILURE_RATE: float = Field(default=0.0, ge=0.0, le=1.0)
     STANDIN_LOAD_SLOWDOWN_FACTOR: float = Field(default=0.05, ge=0.0, le=1.0)
     STANDIN_RANDOM_SEED: int = Field(default=42)
 
     # Concurrency and Rate Limits
     RATE_LIMIT_RPM: int = Field(default=30, ge=1, le=10000, description="Requests Per Minute allocation")
-    RATE_LIMIT_TPM: int = Field(default=6000, ge=100, le=1000000, description="Tokens Per Minute allocation")
+    RATE_LIMIT_TPM: int = Field(default=8000, ge=100, le=1000000, description="Tokens Per Minute allocation")
     RATE_LIMIT_RPD: int = Field(default=14400, ge=1, le=1000000, description="Requests Per Day allocation")
     RATE_LIMIT_TPD: int = Field(default=500000, ge=100, le=100000000, description="Tokens Per Day allocation")
     MAX_CONCURRENT_REQUESTS: int = Field(default=5, ge=1, le=100, description="Max concurrent in-flight model calls")

@@ -8,7 +8,7 @@ from src.relay.schemas import DocumentChunk
 class SufficiencyEvaluator:
     """Evaluates whether retrieved passages provide sufficient evidence to answer the query."""
 
-    def __init__(self, min_token_match_ratio: float = 0.25):
+    def __init__(self, min_token_match_ratio: float = 0.35):
         self.min_token_match_ratio = min_token_match_ratio
 
     def evaluate(
@@ -37,10 +37,13 @@ class SufficiencyEvaluator:
         matched_terms = [t for t in search_terms if t in combined_text]
         coverage_ratio = len(matched_terms) / max(1, len(search_terms))
 
-        if coverage_ratio < self.min_token_match_ratio and refinement_count == 0:
-            # Construct refined query focusing on unmatched key terms
-            unmatched = [t for t in search_terms if t not in combined_text]
-            refined_query = f"{query_plan.original_query} {' '.join(unmatched[:3])}".strip()
-            return False, refined_query, f"Low evidence term overlap ({coverage_ratio:.1%}). Refining query once."
+        if coverage_ratio < self.min_token_match_ratio:
+            if refinement_count == 0:
+                # Construct refined query focusing on unmatched key terms
+                unmatched = [t for t in search_terms if t not in combined_text]
+                refined_query = f"{query_plan.original_query} {' '.join(unmatched[:3])}".strip()
+                return False, refined_query, f"Low evidence term overlap ({coverage_ratio:.1%}). Refining query once."
+            else:
+                return False, query_plan.original_query, f"Evidence insufficient after refinement (term coverage: {coverage_ratio:.1%})."
 
         return True, query_plan.original_query, f"Evidence sufficient (term coverage: {coverage_ratio:.1%})."

@@ -95,7 +95,7 @@ class GroqProvider(ModelProviderBase):
                 content=content,
                 tokens_in=tokens_in,
                 tokens_out=tokens_out,
-                first_token_ms=total_ms,  # For non-streaming, first token is at completion
+                first_token_ms=None,  # In non-streaming execution, TTFT is not measured
                 total_ms=total_ms,
                 model=self.model,
                 headers=resp_headers,

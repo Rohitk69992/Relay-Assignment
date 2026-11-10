@@ -40,7 +40,7 @@ def test_write_and_validate_results_csv(tmp_path: Path):
             tokens_in=200,
             tokens_out=0,
             retrieval_setting="cs600_k4_rerank",
-            answer_grade=AnswerGrade.WRONG.value
+            answer_grade=""  # Operational drop has empty grade
         )
     ]
 

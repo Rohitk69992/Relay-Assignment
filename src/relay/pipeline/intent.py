@@ -23,9 +23,15 @@ class IntentPlanner:
     }
 
     OFF_TOPIC_INDICATORS = [
-        "quantum computing", "dna sequencing", "astronomy", "black holes", "french revolution", "bitcoin",
-        "cricket", "cooking recipe", "weather forecast", "superconductivity"
+        "quantum", "dna sequencing", "astronomy", "black holes", "french revolution", "bitcoin",
+        "cricket", "cooking recipe", "weather forecast", "superconductivity", "sonar", "alphafold", "protein structure"
     ]
+
+    STOP_WORDS = {
+        "what", "when", "where", "which", "how", "does", "explain", "describe", "paper",
+        "the", "and", "for", "with", "from", "that", "this", "was", "were", "are",
+        "all", "you", "need", "used", "tested", "show", "tell", "model", "paper"
+    }
 
     def plan_query(self, question: str) -> QueryPlan:
         q_lower = question.lower()
@@ -48,8 +54,8 @@ class IntentPlanner:
         # Check for obvious off-topic queries
         is_off_topic = any(ot in q_lower for ot in self.OFF_TOPIC_INDICATORS)
 
-        # Clean search terms from alphanumeric words
-        clean_tokens = [w for w in re.findall(r'\b[a-zA-Z0-9_\-\.]{3,}\b', q_lower) if w not in {"what", "when", "where", "which", "how", "does", "explain", "describe", "paper"}]
+        # Clean search terms from alphanumeric words, removing stop words
+        clean_tokens = [w for w in re.findall(r'\b[a-zA-Z0-9_\-\.]{3,}\b', q_lower) if w not in self.STOP_WORDS]
         expanded_terms.extend(clean_tokens)
 
         return QueryPlan(

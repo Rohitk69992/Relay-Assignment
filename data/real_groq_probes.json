@@ -1,0 +1,59 @@
+[
+  {
+    "probe_id": "real_groq_probe_01",
+    "timestamp_utc": "2026-11-10T13:23:25.358154+00:00",
+    "target_url": "https://api.groq.com/openai/v1/chat/completions",
+    "model": "openai/gpt-oss-20b",
+    "http_status": 401,
+    "ttft_ms": null,
+    "total_ms": 1244.6165000001201,
+    "tokens_in": 0,
+    "tokens_out": 0,
+    "response_headers": {
+      "date": "Tue, 10 Nov 2026 13:23:27 GMT",
+      "server": "cloudflare",
+      "cf-ray": "a5855f31ec2cd8ea-BOM"
+    },
+    "authenticated": false,
+    "response_snippet": "{\"error\":{\"message\":\"Invalid API Key\",\"type\":\"invalid_request_error\",\"code\":\"invalid_api_key\"}}\n",
+    "error_detail": "{\"error\":{\"message\":\"Invalid API Key\",\"type\":\"invalid_request_error\",\"code\":\"invalid_api_key\"}}\n"
+  },
+  {
+    "probe_id": "real_groq_probe_02",
+    "timestamp_utc": "2026-11-10T13:23:27.607882+00:00",
+    "target_url": "https://api.groq.com/openai/v1/chat/completions",
+    "model": "openai/gpt-oss-20b",
+    "http_status": 401,
+    "ttft_ms": null,
+    "total_ms": 333.68049999990035,
+    "tokens_in": 0,
+    "tokens_out": 0,
+    "response_headers": {
+      "date": "Tue, 10 Nov 2026 13:23:29 GMT",
+      "server": "cloudflare",
+      "cf-ray": "a5855f3a3a1a4811-BOM"
+    },
+    "authenticated": false,
+    "response_snippet": "{\"error\":{\"message\":\"Invalid API Key\",\"type\":\"invalid_request_error\",\"code\":\"invalid_api_key\"}}\n",
+    "error_detail": "{\"error\":{\"message\":\"Invalid API Key\",\"type\":\"invalid_request_error\",\"code\":\"invalid_api_key\"}}\n"
+  },
+  {
+    "probe_id": "real_groq_probe_03",
+    "timestamp_utc": "2026-11-10T13:23:28.951805+00:00",
+    "target_url": "https://api.groq.com/openai/v1/chat/completions",
+    "model": "openai/gpt-oss-20b",
+    "http_status": 401,
+    "ttft_ms": null,
+    "total_ms": 386.34380000439705,
+    "tokens_in": 0,
+    "tokens_out": 0,
+    "response_headers": {
+      "date": "Tue, 10 Nov 2026 13:23:30 GMT",
+      "server": "cloudflare",
+      "cf-ray": "a5855f42ff19252e-BOM"
+    },
+    "authenticated": false,
+    "response_snippet": "{\"error\":{\"message\":\"Invalid API Key\",\"type\":\"invalid_request_error\",\"code\":\"invalid_api_key\"}}\n",
+    "error_detail": "{\"error\":{\"message\":\"Invalid API Key\",\"type\":\"invalid_request_error\",\"code\":\"invalid_api_key\"}}\n"
+  }
+]

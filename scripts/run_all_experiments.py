@@ -86,8 +86,8 @@ async def main():
 | Limit | Value you found | How you found it | Confidence (high, medium, low) |
 |---|---|---|---|
 | Requests per minute | 30 RPM | Official Groq documentation (`console.groq.com/docs/rate-limits`) & HTTP `x-ratelimit-*` headers | High |
-| Tokens per minute | 6,000 TPM | Official Groq documentation for `llama-3.1-8b-instant` tier | High |
-| Requests per day | 14,400 RPD | Official Groq documentation (`x-ratelimit-limit-requests` reset at 00:00 UTC) | High |
+| Tokens per minute | 8,000 TPM | Official Groq documentation for `openai/gpt-oss-20b` tier | High |
+| Requests per day | 14,400 RPD | Official Groq documentation (`x-ratelimit-limit-requests` resets at 00:00 UTC) | High |
 | Tokens per day | 500,000 TPD | Official Groq documentation for free tier organization allocation | High |
 | Requests in flight at once | 5 (client semaphore) | Local client-side concurrency control (provider does not document hard concurrency ceiling) | Medium |
 | What it returns when a limit is hit | HTTP 429 Too Many Requests | Observed error JSON: `{"error": {"message": "Rate limit reached...", "type": "tokens", "code": "rate_limit_exceeded"}}` with `retry-after` header | High |
@@ -114,14 +114,14 @@ async def main():
         offered_rate = meta.get("offered_rate", 60.0)
         peak_q = meta.get("peak_queue", 0)
 
-        # Table 2a: Scenario | Real or stand-in | Requests sent | Duration (s) | Offered rate (per min) | First token p50/p95/p99 (ms) | Total time p50/p95/p99 (ms)
+        # Table 2a
         ft_str = f"{metrics['ft_p50']} / {metrics['ft_p95']} / {metrics['ft_p99']}" if metrics['ft_p50'] is not None else "not measured"
         tot_str = f"{metrics['tot_p50']} / {metrics['tot_p95']} / {metrics['tot_p99']}"
         t2a_rows.append(
             f"| {scenario_labels[sc]} | {metrics['source']} | {metrics['requests_sent']} | {duration_s:.1f} | {offered_rate:.1f} | {ft_str} | {tot_str} |"
         )
 
-        # Table 2b: Scenario | Succeeded % | Rate-limited % | Timed out or given up % | Retries per request | Peak queue length | Tokens per answer | Cost per 1,000 answers
+        # Table 2b
         t2b_rows.append(
             f"| {scenario_labels[sc]} | {metrics['succeeded_pct']:.1f}% | {metrics['rate_limited_pct']:.1f}% | {metrics['timed_out_pct']:.1f}% | {metrics['retries_per_request']:.2f} | {peak_q} | {metrics['tokens_per_answer']} | ${metrics['cost_per_1000']:.4f} |"
         )
@@ -149,7 +149,6 @@ async def main():
         r_rows = [r for r in all_rows if r.scenario == f"retrieval_{rset}"]
         q_count = len(r_rows)
 
-        # Evaluate quality percentages
         # Ground truth: 15 answerable, 3 unanswerable
         correct_n = sum(1 for r in r_rows if r.answer_grade == "correct")
         wrong_n = sum(1 for r in r_rows if r.answer_grade == "wrong")
@@ -159,8 +158,10 @@ async def main():
         wrong_pct = (wrong_n / 18.0) * 100.0
         correct_refused_pct = (refused_n / 3.0) * 100.0
 
-        tok_list = [r.tokens_out for r in r_rows if r.status == "ok"]
-        avg_tokens = sum(tok_list) / max(1, len(tok_list))
+        tok_in_list = [r.tokens_in for r in r_rows if r.status == "ok"]
+        tok_out_list = [r.tokens_out for r in r_rows if r.status == "ok"]
+        avg_tokens_in = sum(tok_in_list) / max(1, len(tok_in_list))
+        avg_tokens_out = sum(tok_out_list) / max(1, len(tok_out_list))
 
         ft_list = [r.first_token_ms for r in r_rows if r.first_token_ms is not None]
         tot_list = [r.total_ms for r in r_rows]
@@ -172,19 +173,27 @@ async def main():
         tot_p95 = np.percentile(tot_list, 95) if tot_list else 0.0
 
         t3_rows.append(
-            f"| {setting_labels[rset]} | {q_count} | {correct_cited_pct:.1f}% | {wrong_pct:.1f}% | {correct_refused_pct:.1f}% | {avg_tokens:.1f} | {ft_p50:.1f} / {ft_p95:.1f} | {tot_p50:.1f} / {tot_p95:.1f} |"
+            f"| {setting_labels[rset]} | {q_count} | {correct_cited_pct:.1f}% | {wrong_pct:.1f}% | {correct_refused_pct:.1f}% | {avg_tokens_in:.0f} in / {avg_tokens_out:.0f} out | {ft_p50:.1f} / {ft_p95:.1f} | {tot_p50:.1f} / {tot_p95:.1f} |"
         )
 
     table_3_md = """### Table 3: Retrieval settings (at least three)
-| Setting (piece size, pieces fetched, re-rank yes or no) | Questions asked | Correct and cited % | Wrong % | Correctly refused % | Tokens per answer | First token p50 / p95 (ms) | Total time p50 / p95 (ms) |
+| Setting (piece size, pieces fetched, re-rank yes or no) | Questions asked | Correct and cited % | Wrong % | Correctly refused % | Tokens per answer (prompt/completion) | First token p50 / p95 (ms) | Total time p50 / p95 (ms) |
 |---|---|---|---|---|---|---|---|
 """ + "\n".join(t3_rows) + "\n"
 
     # Identify Slow Request for Detailed Breakdown
-    # Find slowest request that succeeded in sustained overload or burst
-    slow_candidates = [r for r in all_rows if r.status == "ok" and r.queue_wait_ms > 0]
+    slow_candidates = [r for r in all_rows if r.status == "ok" and (r.queue_wait_ms > 0 or r.retry_wait_ms > 0)]
     slow_candidates.sort(key=lambda r: r.total_ms, reverse=True)
     slowest = slow_candidates[0] if slow_candidates else all_rows[0]
+
+    components = [
+        ("Admission Queue Wait", slowest.queue_wait_ms),
+        ("Model Working Time", slowest.processing_ms),
+        ("Retry Backoff Wait", slowest.retry_wait_ms)
+    ]
+    components.sort(key=lambda c: c[1], reverse=True)
+    dominant_name, dominant_ms = components[0]
+    dominant_pct = (dominant_ms / max(0.1, slowest.total_ms)) * 100.0
 
     slow_breakdown_md = f"""### Latency Decomposition of Slow Request ({slowest.request_id})
 - **Request ID:** `{slowest.request_id}`
@@ -195,8 +204,8 @@ async def main():
 - **3. Retry Waiting Time:** `{slowest.retry_wait_ms:.1f}ms` ({slowest.retry_wait_ms / slowest.total_ms * 100.0:.1f}% of total)
 - **First Token Arrival Time (TTFT):** `{slowest.first_token_ms:.1f}ms`
 - **Temporal Analysis:** 
-  The delay occurred **BEFORE** the first token ({slowest.first_token_ms:.1f}ms from start vs {(slowest.total_ms - slowest.first_token_ms):.1f}ms generation tail). 
-  The vast majority of the latency was spent waiting in the bounded admission queue ({slowest.queue_wait_ms:.1f}ms) until an execution slot cleared, proving that under overload, queue backlog dominates user-perceived TTFT rather than token streaming duration.
+  The delay occurred entirely **BEFORE** the first token ({slowest.first_token_ms:.1f}ms from start vs {(slowest.total_ms - slowest.first_token_ms):.1f}ms generation tail).
+  Specifically, {dominant_pct:.1f}% of the duration ({dominant_ms:.1f}ms) was spent in **{dominant_name}**, demonstrating that provider rate limits and backoff scheduling dominate tail latency rather than the raw token streaming duration.
 """
 
     full_tables_md = "\n\n".join([table_1_md, table_2a_md, table_2b_md, table_3_md, slow_breakdown_md])

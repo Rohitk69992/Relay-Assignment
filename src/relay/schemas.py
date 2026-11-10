@@ -82,7 +82,7 @@ class PipelineResponse(BaseModel):
     answer: str
     citations: List[Citation] = Field(default_factory=list)
     status: RequestStatus
-    answer_grade: AnswerGrade
+    answer_grade: Optional[AnswerGrade] = None
     first_token_ms: Optional[float] = None
     total_ms: float
     queue_wait_ms: float = 0.0
@@ -108,7 +108,7 @@ class ResultsCsvRow(BaseModel):
     tokens_in: int
     tokens_out: int
     retrieval_setting: str
-    answer_grade: str  # 'correct', 'wrong', 'refused_correctly', 'refused_wrongly'
+    answer_grade: Optional[str] = None  # 'correct', 'wrong', 'refused_correctly', 'refused_wrongly', or None for un-graded / operational drops
     # Extended telemetry columns
     queue_wait_ms: Optional[float] = None
     processing_ms: Optional[float] = None

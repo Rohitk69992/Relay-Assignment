@@ -1,12 +1,19 @@
-"""Stage 7: Citation and factuality verification."""
+"""Stage 7: Citation and factuality verification (Internal Grounding Auditor)."""
 
 import re
 from typing import List, Optional, Tuple
-from src.relay.schemas import AnswerGrade, Citation, DocumentChunk
+from src.relay.schemas import Citation, DocumentChunk
 
 
 class ResponseVerifier:
-    """Audits generated answers for citation accuracy, grounding, and proper refusal adherence."""
+    """Audits generated answers for internal citation validity and grounding against retrieved context.
+    
+    This verifier operates strictly as a runtime consistency check:
+    - Extracts citations formatted as [Paper Title, Page X, Section Y].
+    - Verifies that cited papers and pages actually exist in the retrieved context chunks.
+    - Identifies legitimate refusals vs hallucinated citations.
+    It does NOT access external evaluation ground truth.
+    """
 
     CITATION_REGEX = re.compile(
         r'\[(Attention Is All You Need|Moshi[^,]*|Dynamic Chunking[^,]*),\s*Page\s*(\d+)(?:,\s*Section\s*([^\]]+))?\]',
@@ -41,41 +48,26 @@ class ResponseVerifier:
                 continue
         return citations
 
-    def verify(
+    def verify_grounding(
         self,
         answer: str,
-        retrieved_chunks: List[DocumentChunk],
-        is_known_answerable: Optional[bool] = None,
-        expected_paper_id: Optional[str] = None,
-        expected_page: Optional[int] = None
-    ) -> Tuple[AnswerGrade, List[Citation], str]:
-        """Audits answer correctness and citations.
+        retrieved_chunks: List[DocumentChunk]
+    ) -> Tuple[bool, List[Citation], bool, str]:
+        """Audits answer correctness and citations against retrieved chunks.
 
         Returns:
-            (grade: AnswerGrade, citations: List[Citation], explanation: str)
+            (is_grounded: bool, citations: List[Citation], is_refusal: bool, explanation: str)
         """
         ans_lower = answer.lower()
         is_refusal = any(ind in ans_lower for ind in self.REFUSAL_INDICATORS)
 
-        # 1. Evaluate Refusal Cases
-        if is_known_answerable is not None:
-            if not is_known_answerable:
-                if is_refusal:
-                    return AnswerGrade.REFUSED_CORRECTLY, [], "Unanswerable question was correctly refused."
-                else:
-                    return AnswerGrade.WRONG, [], "Question is unanswerable from the library, but the model attempted an answer."
-            else:
-                if is_refusal:
-                    return AnswerGrade.REFUSED_WRONGLY, [], "Answerable question was wrongly refused."
-
-        # 2. If it's a general refusal without prior label
         if is_refusal:
-            return AnswerGrade.REFUSED_CORRECTLY, [], "Model indicated information absent from library."
+            return True, [], True, "Explicit refusal grounded in absence of sufficient evidence."
 
-        # 3. Citation Audit
+        # Extract citations
         extracted_citations = self.extract_citations(answer)
         if not extracted_citations:
-            return AnswerGrade.WRONG, [], "Answer contains factual claims but lacks required [Paper, Page, Section] citations."
+            return False, [], False, "Answer contains factual claims but lacks required [Paper, Page, Section] citations."
 
         # Verify whether citations exist in retrieved chunks
         valid_citations = 0
@@ -88,15 +80,6 @@ class ResponseVerifier:
                 valid_citations += 1
 
         if valid_citations == 0:
-            return AnswerGrade.WRONG, extracted_citations, "Citations present but do not match any retrieved chunks (hallucinated citation)."
+            return False, extracted_citations, False, "Citations present in text do not match any retrieved chunks (hallucinated citation)."
 
-        # Check ground truth target match if provided
-        if expected_paper_id and expected_page:
-            target_match = any(
-                c.paper_id == expected_paper_id and abs(c.page - expected_page) <= 1
-                for c in extracted_citations
-            )
-            if not target_match:
-                return AnswerGrade.WRONG, extracted_citations, f"Answer cited pages other than expected ground truth ({expected_paper_id} P.{expected_page})."
-
-        return AnswerGrade.CORRECT, extracted_citations, f"Verified with {valid_citations} valid citation(s)."
+        return True, extracted_citations, False, f"Grounding verified with {valid_citations} valid citation(s) from context."

@@ -78,7 +78,7 @@ def validate_results_csv(filepath: Path) -> Tuple[bool, List[str]]:
                 errors.append(f"Row {idx}: invalid status '{status}'")
 
             grade = row.get("answer_grade", "").strip()
-            if grade not in valid_grades:
+            if grade and grade not in valid_grades:
                 errors.append(f"Row {idx}: invalid answer_grade '{grade}'")
 
             source = row.get("source", "").strip()

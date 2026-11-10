@@ -2,6 +2,7 @@
 
 import asyncio
 import sys
+sys.stdout.reconfigure(encoding='utf-8')
 import time
 from pathlib import Path
 from typing import Dict, List, Tuple
@@ -16,7 +17,6 @@ from src.relay.provider.standin_client import StandInProvider
 from src.relay.resilience.queue_manager import AdmissionQueueManager
 from src.relay.resilience.rate_limiter import ClientRateLimiter
 from src.relay.schemas import (
-    AnswerGrade,
     PipelineRequest,
     PipelineResponse,
     ResultsCsvRow,
@@ -27,15 +27,15 @@ from src.relay.schemas import (
 logger = get_logger("relay.load_test")
 
 
-async def run_scenario_a_steady(num_requests: int = 15) -> Tuple[List[ResultsCsvRow], Dict]:
+async def run_scenario_a_steady(num_requests: int = 20) -> Tuple[List[ResultsCsvRow], Dict]:
     """Scenario A: Steady Load - Regular request arrival within provider capacity."""
     print("\n" + "=" * 60)
     print("SCENARIO A: STEADY LOAD (Offered load within capacity)")
     print("=" * 60)
 
     # RPM = 30; requests spaced at 2.1s (offered rate ~28.5 req/min < 30)
-    provider = StandInProvider(rpm=30, tpm=10000, p50_latency_ms=120.0, p95_latency_ms=280.0, tokens_per_sec=800.0, random_seed=101)
-    rate_limiter = ClientRateLimiter(rpm=30, tpm=10000)
+    provider = StandInProvider(rpm=30, tpm=8000, random_seed=101)
+    rate_limiter = ClientRateLimiter(rpm=30, tpm=8000)
     orchestrator = PipelineOrchestrator(provider=provider, rate_limiter=rate_limiter)
 
     test_queries = [
@@ -58,7 +58,7 @@ async def run_scenario_a_steady(num_requests: int = 15) -> Tuple[List[ResultsCsv
             source=SourceType.STANDIN,
             retrieval_setting=RetrievalSetting(chunk_size=600, top_k=4, rerank=True)
         )
-        resp = await orchestrator.execute_request(req, expected_answerable=True)
+        resp = await orchestrator.execute_request(req)
         rows.append(
             ResultsCsvRow(
                 request_id=resp.request_id,
@@ -72,7 +72,7 @@ async def run_scenario_a_steady(num_requests: int = 15) -> Tuple[List[ResultsCsv
                 tokens_in=resp.tokens_in,
                 tokens_out=resp.tokens_out,
                 retrieval_setting=resp.retrieval_setting,
-                answer_grade=resp.answer_grade.value,
+                answer_grade="",  # Operational load test rows carry no ground-truth accuracy grade
                 queue_wait_ms=resp.queue_wait_ms,
                 processing_ms=resp.processing_ms,
                 retry_wait_ms=resp.retry_wait_ms,
@@ -89,14 +89,14 @@ async def run_scenario_a_steady(num_requests: int = 15) -> Tuple[List[ResultsCsv
     return rows, {"duration_s": duration_s, "offered_rate": offered_rate, "peak_queue": orchestrator.queue_mgr.peak_queue_depth}
 
 
-async def run_scenario_b_burst(num_requests: int = 20) -> Tuple[List[ResultsCsvRow], Dict]:
+async def run_scenario_b_burst(num_requests: int = 25) -> Tuple[List[ResultsCsvRow], Dict]:
     """Scenario B: Sudden Burst - Sharp spike of concurrent demand at t=0."""
     print("\n" + "=" * 60)
-    print("SCENARIO B: SUDDEN BURST (20 concurrent requests at t=0)")
+    print("SCENARIO B: SUDDEN BURST (25 concurrent requests at t=0)")
     print("=" * 60)
 
     # Concurrency limit = 4, Queue limit = 40
-    provider = StandInProvider(rpm=60, tpm=20000, p50_latency_ms=130.0, p95_latency_ms=320.0, load_slowdown_factor=0.08, random_seed=202)
+    provider = StandInProvider(rpm=60, tpm=20000, load_slowdown_factor=0.08, random_seed=202)
     queue_mgr = AdmissionQueueManager(max_queue_size=40, max_concurrency=4, queue_timeout_seconds=15.0)
     rate_limiter = ClientRateLimiter(rpm=60, tpm=20000)
     orchestrator = PipelineOrchestrator(provider=provider, queue_mgr=queue_mgr, rate_limiter=rate_limiter)
@@ -113,7 +113,7 @@ async def run_scenario_b_burst(num_requests: int = 20) -> Tuple[List[ResultsCsvR
             source=SourceType.STANDIN,
             retrieval_setting=RetrievalSetting(chunk_size=600, top_k=4, rerank=True)
         )
-        resp = await orchestrator.execute_request(req, expected_answerable=True)
+        resp = await orchestrator.execute_request(req)
         return ResultsCsvRow(
             request_id=resp.request_id,
             scenario=resp.scenario,
@@ -126,7 +126,7 @@ async def run_scenario_b_burst(num_requests: int = 20) -> Tuple[List[ResultsCsvR
             tokens_in=resp.tokens_in,
             tokens_out=resp.tokens_out,
             retrieval_setting=resp.retrieval_setting,
-            answer_grade=resp.answer_grade.value,
+            answer_grade="",
             queue_wait_ms=resp.queue_wait_ms,
             processing_ms=resp.processing_ms,
             retry_wait_ms=resp.retry_wait_ms,
@@ -143,14 +143,14 @@ async def run_scenario_b_burst(num_requests: int = 20) -> Tuple[List[ResultsCsvR
     return rows, {"duration_s": duration_s, "offered_rate": offered_rate, "peak_queue": queue_mgr.peak_queue_depth}
 
 
-async def run_scenario_c_sustained_overload(num_requests: int = 35) -> Tuple[List[ResultsCsvRow], Dict]:
+async def run_scenario_c_sustained_overload(num_requests: int = 40) -> Tuple[List[ResultsCsvRow], Dict]:
     """Scenario C: Sustained Overload - Offered traffic continuously exceeds processing capacity."""
     print("\n" + "=" * 60)
     print("SCENARIO C: SUSTAINED OVERLOAD (Rapid arrival exceeding queue & concurrency)")
     print("=" * 60)
 
     # Tight queue (8 max) and queue wait timeout (1.0s), concurrency 2
-    provider = StandInProvider(rpm=100, tpm=50000, p50_latency_ms=180.0, p95_latency_ms=450.0, load_slowdown_factor=0.15, failure_rate=0.05, random_seed=303)
+    provider = StandInProvider(rpm=100, tpm=50000, load_slowdown_factor=0.15, failure_rate=0.05, random_seed=303)
     queue_mgr = AdmissionQueueManager(max_queue_size=8, max_concurrency=2, queue_timeout_seconds=1.0)
     rate_limiter = ClientRateLimiter(rpm=100, tpm=50000)
     orchestrator = PipelineOrchestrator(provider=provider, queue_mgr=queue_mgr, rate_limiter=rate_limiter)
@@ -168,7 +168,7 @@ async def run_scenario_c_sustained_overload(num_requests: int = 35) -> Tuple[Lis
             source=SourceType.STANDIN,
             retrieval_setting=RetrievalSetting(chunk_size=600, top_k=4, rerank=True)
         )
-        resp = await orchestrator.execute_request(req, expected_answerable=True)
+        resp = await orchestrator.execute_request(req)
         return ResultsCsvRow(
             request_id=resp.request_id,
             scenario=resp.scenario,
@@ -181,7 +181,7 @@ async def run_scenario_c_sustained_overload(num_requests: int = 35) -> Tuple[Lis
             tokens_in=resp.tokens_in,
             tokens_out=resp.tokens_out,
             retrieval_setting=resp.retrieval_setting,
-            answer_grade=resp.answer_grade.value,
+            answer_grade="",
             queue_wait_ms=resp.queue_wait_ms,
             processing_ms=resp.processing_ms,
             retry_wait_ms=resp.retry_wait_ms,
@@ -199,15 +199,15 @@ async def run_scenario_c_sustained_overload(num_requests: int = 35) -> Tuple[Lis
     return rows, {"duration_s": duration_s, "offered_rate": offered_rate, "peak_queue": queue_mgr.peak_queue_depth}
 
 
-async def run_scenario_d_limit_halved(num_requests: int = 20) -> Tuple[List[ResultsCsvRow], Dict]:
+async def run_scenario_d_limit_halved(num_requests: int = 25) -> Tuple[List[ResultsCsvRow], Dict]:
     """Scenario D: Per-Minute Limit Halved - Stand-in RPM reduced by 50% (from 30 to 15)."""
     print("\n" + "=" * 60)
     print("SCENARIO D: PER-MINUTE LIMIT HALVED (RPM = 15)")
     print("=" * 60)
 
-    # RPM = 15 instead of standard 30; 20 requests sent at interval of 0.8s (offered rate ~75 req/min)
-    provider = StandInProvider(rpm=15, tpm=5000, p50_latency_ms=130.0, p95_latency_ms=300.0, random_seed=404)
-    rate_limiter = ClientRateLimiter(rpm=15, tpm=5000)
+    # RPM = 15 instead of standard 30; 25 requests sent at interval of 0.8s (offered rate ~75 req/min)
+    provider = StandInProvider(rpm=15, tpm=4000, random_seed=404)
+    rate_limiter = ClientRateLimiter(rpm=15, tpm=4000)
     orchestrator = PipelineOrchestrator(provider=provider, rate_limiter=rate_limiter)
 
     rows: List[ResultsCsvRow] = []
@@ -222,7 +222,7 @@ async def run_scenario_d_limit_halved(num_requests: int = 20) -> Tuple[List[Resu
             source=SourceType.STANDIN,
             retrieval_setting=RetrievalSetting(chunk_size=600, top_k=4, rerank=True)
         )
-        resp = await orchestrator.execute_request(req, expected_answerable=True)
+        resp = await orchestrator.execute_request(req)
         rows.append(
             ResultsCsvRow(
                 request_id=resp.request_id,
@@ -236,7 +236,7 @@ async def run_scenario_d_limit_halved(num_requests: int = 20) -> Tuple[List[Resu
                 tokens_in=resp.tokens_in,
                 tokens_out=resp.tokens_out,
                 retrieval_setting=resp.retrieval_setting,
-                answer_grade=resp.answer_grade.value,
+                answer_grade="",
                 queue_wait_ms=resp.queue_wait_ms,
                 processing_ms=resp.processing_ms,
                 retry_wait_ms=resp.retry_wait_ms,
@@ -260,7 +260,7 @@ async def run_scenario_e_daily_budget_exhausted(num_requests: int = 20) -> Tuple
     print("=" * 60)
 
     # RPD = 5: first 5 succeed, remaining 15 hit daily quota immediately
-    provider = StandInProvider(rpd=5, p50_latency_ms=100.0, random_seed=505)
+    provider = StandInProvider(rpd=5, random_seed=505)
     rate_limiter = ClientRateLimiter(rpd=5)
     orchestrator = PipelineOrchestrator(provider=provider, rate_limiter=rate_limiter)
 
@@ -276,7 +276,7 @@ async def run_scenario_e_daily_budget_exhausted(num_requests: int = 20) -> Tuple
             source=SourceType.STANDIN,
             retrieval_setting=RetrievalSetting(chunk_size=600, top_k=4, rerank=True)
         )
-        resp = await orchestrator.execute_request(req, expected_answerable=True)
+        resp = await orchestrator.execute_request(req)
         rows.append(
             ResultsCsvRow(
                 request_id=resp.request_id,
@@ -290,7 +290,7 @@ async def run_scenario_e_daily_budget_exhausted(num_requests: int = 20) -> Tuple
                 tokens_in=resp.tokens_in,
                 tokens_out=resp.tokens_out,
                 retrieval_setting=resp.retrieval_setting,
-                answer_grade=resp.answer_grade.value,
+                answer_grade="",
                 queue_wait_ms=resp.queue_wait_ms,
                 processing_ms=resp.processing_ms,
                 retry_wait_ms=resp.retry_wait_ms,
