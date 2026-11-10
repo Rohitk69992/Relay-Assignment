@@ -11,7 +11,6 @@ ENV/
 
 # Configuration and Secrets
 .env
-.env.example
 *.local.env
 
 # Testing & Coverage
