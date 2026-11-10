@@ -1,0 +1,200 @@
+[
+  {
+    "question_id": "Q01_FACT_ATTN_SCALING",
+    "category": "Direct factual question",
+    "question": "In 'Attention Is All You Need', why is the dot product of queries and keys scaled by 1/sqrt(d_k)?",
+    "expected_answer": "To counteract large magnitude dot products for large d_k values, which push the softmax function into regions with extremely small gradients.",
+    "expected_paper": "1706.03762v7",
+    "expected_page": 4,
+    "expected_section": "3.2.1 Scaled Dot-Product Attention",
+    "is_answerable": true,
+    "distractor_notes": null
+  },
+  {
+    "question_id": "Q02_FACT_ATTN_HEADS",
+    "category": "Direct factual question",
+    "question": "What is the number of heads (h) and dimension of keys (d_k) in the base Transformer model?",
+    "expected_answer": "The base model uses h = 8 parallel attention heads, with d_k = d_v = 64 (d_model / h = 512 / 8).",
+    "expected_paper": "1706.03762v7",
+    "expected_page": 4,
+    "expected_section": "3.2.2 Multi-Head Attention",
+    "is_answerable": true,
+    "distractor_notes": null
+  },
+  {
+    "question_id": "Q03_FACT_MOSHI_CODEC",
+    "category": "Direct factual question",
+    "question": "What neural audio codec does Moshi use, what is its framerate, and what is its theoretical latency?",
+    "expected_answer": "Moshi uses the Mimi neural audio codec operating at 12.5 Hz with an overall latency of 80ms (or 200ms with lookahead).",
+    "expected_paper": "2410.00037v1",
+    "expected_page": 6,
+    "expected_section": "3.1 Overview",
+    "is_answerable": true,
+    "distractor_notes": null
+  },
+  {
+    "question_id": "Q04_FACT_MOSHI_HELIUM",
+    "category": "Direct factual question",
+    "question": "What is the parameter size of the Helium text language model incorporated into Moshi?",
+    "expected_answer": "Helium is a 7 billion parameter (7B) text language model.",
+    "expected_paper": "2410.00037v1",
+    "expected_page": 7,
+    "expected_section": "3.2 The Helium Text Language Model",
+    "is_answerable": true,
+    "distractor_notes": null
+  },
+  {
+    "question_id": "Q05_FACT_DC_BOUNDARY",
+    "category": "Direct factual question",
+    "question": "In Dynamic Chunking, what component predicts where boundaries occur between sequence chunks?",
+    "expected_answer": "A boundary predictor (or chunking layer) parameterized by a routing probability/decision function.",
+    "expected_paper": "2507.07955v2",
+    "expected_page": 6,
+    "expected_section": "2.2 Dynamic Chunking (DC)",
+    "is_answerable": true,
+    "distractor_notes": null
+  },
+  {
+    "question_id": "Q06_TECH_ATTN_WARMUP",
+    "category": "Technical explanation",
+    "question": "Explain the learning rate schedule and warmup formula used to train the Transformer model in Vaswani et al.",
+    "expected_answer": "The learning rate varies according to lrate = d_model^(-0.5) * min(step_num^(-0.5), step_num * warmup_steps^(-1.5)), with warmup_steps = 4000.",
+    "expected_paper": "1706.03762v7",
+    "expected_page": 7,
+    "expected_section": "5.3 Optimizer",
+    "is_answerable": true,
+    "distractor_notes": null
+  },
+  {
+    "question_id": "Q07_TECH_DC_DECHUNKING",
+    "category": "Technical explanation",
+    "question": "How does dechunking work in H-Net when reconstructing token representations from chunk embeddings?",
+    "expected_answer": "Dechunking expands chunk representations back to original sequence length using broadcast or repeat operations combined with fine-grained residual connections.",
+    "expected_paper": "2507.07955v2",
+    "expected_page": 6,
+    "expected_section": "2.2.2 Dechunking",
+    "is_answerable": true,
+    "distractor_notes": null
+  },
+  {
+    "question_id": "Q08_TECH_MOSHI_DUPLEX",
+    "category": "Technical explanation",
+    "question": "How does Moshi model multi-stream duplex audio dialogue without requiring turn-taking silence detection?",
+    "expected_answer": "Moshi models speech as concurrent streams of text and audio tokens for both the user and the system, predicting them jointly in an interleaved multi-stream sequence.",
+    "expected_paper": "2410.00037v1",
+    "expected_page": 6,
+    "expected_section": "3.1 Overview",
+    "is_answerable": true,
+    "distractor_notes": null
+  },
+  {
+    "question_id": "Q09_COMP_ATTN_VS_DC",
+    "category": "Comparative question",
+    "question": "Compare the sequence modeling approach of standard quadratic Self-Attention in Vaswani et al. with the hierarchical chunking in Dynamic Chunking.",
+    "expected_answer": "Standard self-attention computes dense pairwise comparisons with O(N^2) complexity across all tokens, whereas Dynamic Chunking reduces sequence length dynamically into hierarchical chunks, computing attention/state-space modeling at a compressed sequence level.",
+    "expected_paper": "2507.07955v2",
+    "expected_page": 4,
+    "expected_section": "2.1 Architectural Overview",
+    "is_answerable": true,
+    "distractor_notes": null
+  },
+  {
+    "question_id": "Q10_COMP_MOSHI_STREAMING",
+    "category": "Comparative question",
+    "question": "How does the causal masking in Transformer decoder layers compare with the stream synchronization in Moshi?",
+    "expected_answer": "The Transformer uses autoregressive causal masking to prevent attending to future tokens, while Moshi uses causal convolutions and temporal alignment delays to synchronize parallel user and agent audio streams.",
+    "expected_paper": "2410.00037v1",
+    "expected_page": 6,
+    "expected_section": "3.1 Overview",
+    "is_answerable": true,
+    "distractor_notes": null
+  },
+  {
+    "question_id": "Q11_MULTI_SEC_TRANSFORMER",
+    "category": "Questions requiring context from different sections",
+    "question": "What positional encoding formula does the Transformer use, and how does the paper evaluate its performance against learned positional embeddings in the results table?",
+    "expected_answer": "It uses sinusoidal encodings with alternating sine and cosine functions (Section 3.5), and Table 3 shows learned positional embeddings produce nearly identical BLEU scores (27.3 vs 27.2) to sinusoidal encodings.",
+    "expected_paper": "1706.03762v7",
+    "expected_page": 9,
+    "expected_section": "Table 3",
+    "is_answerable": true,
+    "distractor_notes": null
+  },
+  {
+    "question_id": "Q12_CROSS_PAPER_TOKENIZATION",
+    "category": "Questions requiring evidence from different papers",
+    "question": "How does tokenization differ between the subword approach in Vaswani et al. and the audio quantization in Moshi?",
+    "expected_answer": "Vaswani et al. use Byte-Pair Encoding / WordPiece subword tokens for discrete text, whereas Moshi quantizes continuous speech audio into discrete acoustic tokens using Residual Vector Quantization (RVQ) in Mimi.",
+    "expected_paper": "2410.00037v1",
+    "expected_page": 6,
+    "expected_section": "3.1 Overview",
+    "is_answerable": true,
+    "distractor_notes": null
+  },
+  {
+    "question_id": "Q13_REFUSAL_QUANTUM",
+    "category": "Questions whose answers are absent from the library",
+    "question": "What quantum computing circuit was benchmarked in 'Attention Is All You Need'?",
+    "expected_answer": "REFUSAL: The supplied research library does not establish the answer to this question.",
+    "expected_paper": "1706.03762v7",
+    "expected_page": 0,
+    "expected_section": "None",
+    "is_answerable": false,
+    "distractor_notes": "Quantum computing is completely absent from all three papers."
+  },
+  {
+    "question_id": "Q14_REFUSAL_SONAR",
+    "category": "Questions whose answers are absent from the library",
+    "question": "What is Moshi's measured error rate on underwater sonar signal decoding?",
+    "expected_answer": "REFUSAL: The supplied research library does not establish the answer to this question.",
+    "expected_paper": "2410.00037v1",
+    "expected_page": 0,
+    "expected_section": "None",
+    "is_answerable": false,
+    "distractor_notes": "Moshi models conversational human speech; sonar is not studied."
+  },
+  {
+    "question_id": "Q15_REFUSAL_ALPHAFOLD",
+    "category": "Questions whose answers are absent from the library",
+    "question": "What batch size was used to train Dynamic Chunking on AlphaFold protein structures?",
+    "expected_answer": "REFUSAL: The supplied research library does not establish the answer to this question.",
+    "expected_paper": "2507.07955v2",
+    "expected_page": 0,
+    "expected_section": "None",
+    "is_answerable": false,
+    "distractor_notes": "Dynamic Chunking was not trained on AlphaFold protein structures."
+  },
+  {
+    "question_id": "Q16_AMBIGUITY_CHUNK_SIZE",
+    "category": "Questions designed to expose retrieval ambiguity",
+    "question": "What is the chunk size in the architecture?",
+    "expected_answer": "In 'Dynamic Chunking', chunks have variable dynamic lengths determined by the boundary predictor, whereas fixed-chunk baselines test sizes like 8 or 16. In audio models, Mimi uses 80ms audio frames.",
+    "expected_paper": "2507.07955v2",
+    "expected_page": 6,
+    "expected_section": "2.2 Dynamic Chunking",
+    "is_answerable": true,
+    "distractor_notes": "Ambiguous because both Dynamic Chunking and Moshi/Mimi discuss chunking/framing."
+  },
+  {
+    "question_id": "Q17_AMBIGUITY_LATENCY",
+    "category": "Questions designed to expose retrieval ambiguity",
+    "question": "What is the measured latency in milliseconds reported in the paper?",
+    "expected_answer": "Moshi reports an overall latency of 160ms (200ms with lookahead) for speech-to-speech interaction, with Mimi codec introducing 80ms latency.",
+    "expected_paper": "2410.00037v1",
+    "expected_page": 1,
+    "expected_section": "Abstract",
+    "is_answerable": true,
+    "distractor_notes": "Ambiguous because multiple papers discuss inference time or step latency."
+  },
+  {
+    "question_id": "Q18_FACT_BLEU_SCORE",
+    "category": "Direct factual question",
+    "question": "What BLEU score did the big Transformer model achieve on the WMT 2014 English-to-German translation task in Vaswani et al.?",
+    "expected_answer": "The big model achieved 28.4 BLEU on the WMT 2014 English-to-German task.",
+    "expected_paper": "1706.03762v7",
+    "expected_page": 8,
+    "expected_section": "Table 2",
+    "is_answerable": true,
+    "distractor_notes": null
+  }
+]

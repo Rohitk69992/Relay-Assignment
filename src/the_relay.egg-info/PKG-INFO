@@ -1,0 +1,21 @@
+Metadata-Version: 2.4
+Name: the-relay
+Version: 1.0.0
+Summary: The Relay: A resilient, grounded research-paper LLM pipeline and benchmarking framework
+Author: Principal AI Engineer
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown
+Requires-Dist: pydantic>=2.10.0
+Requires-Dist: pydantic-settings>=2.7.0
+Requires-Dist: fastapi>=0.115.0
+Requires-Dist: uvicorn>=0.34.0
+Requires-Dist: httpx>=0.28.0
+Requires-Dist: pypdf>=5.1.0
+Requires-Dist: rank-bm25>=0.2.2
+Requires-Dist: python-dotenv>=1.0.1
+Requires-Dist: reportlab>=4.2.0
+Requires-Dist: pillow>=10.4.0
+Requires-Dist: numpy>=2.0.0
+Provides-Extra: dev
+Requires-Dist: pytest>=8.3.0; extra == "dev"
+Requires-Dist: pytest-asyncio>=0.25.0; extra == "dev"
