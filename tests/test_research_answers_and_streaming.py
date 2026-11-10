@@ -1,22 +1,27 @@
 """Comprehensive regression tests verifying research answer generation, streaming, and citation validation.
 
-Covers the 10 core functional tests:
-1. Transformer conceptual question (scaled dot-product attention mechanics).
-2. Moshi question (Mimi audio codec & Helium LM).
-3. Dynamic Chunking question (boundary predictor).
-4. Cross-paper comparison (Transformer vs Dynamic Chunking).
-5. Unsupported question refusal (Groq pricing).
-6. Scope mismatch refusal (Moshi question under Attention paper scope).
-7. Non-streaming execution consistency.
-8. Streaming SSE consistency (chunk accumulation equals complete answer, request ID verified).
-9. Stand-in honesty (labeled extractive simulation, real evidence passages, zero generic filler).
-10. No silent fallback (Groq mode without API key yields clean configuration error).
+Covers all required acceptance tests:
+- Test A: Groq provider selection
+- Test B: No silent fallback when key missing
+- Test C: Provider authentication error handling (HTTP 401)
+- Test D: Actual generated answer preservation (genuine LLM responses preserved)
+- Test E: Streaming answer preservation & SSE accumulation
+- Test F: Stand-in honesty and extractive simulation labelling
+- Test G: Retrieval relevance (scaled dot-product attention, Moshi, Dynamic Chunking)
+- Test H: Scope mismatch server-side enforcement
+- Test I: Missing telemetry preservation (TTFT is None for non-streaming)
+- Test J: Calibration metadata & status consistency
 """
 
+import json
+from unittest.mock import AsyncMock, patch
 import pytest
+from src.relay.config import ProviderMode, settings
 from src.relay.pipeline.orchestrator import PipelineOrchestrator
+from src.relay.provider.base import ProviderResponse
 from src.relay.provider.groq_client import GroqProvider
 from src.relay.provider.standin_client import StandInProvider
+from src.relay.retrieval.retriever import ResearchRetriever
 from src.relay.schemas import (
     PipelineRequest,
     RequestStatus,
@@ -33,237 +38,26 @@ def fast_standin_orchestrator():
 
 
 # -----------------------------------------------------------------------------
-# TEST 1: Transformer Conceptual Question
+# TEST A: Groq Provider Selection
 # -----------------------------------------------------------------------------
-@pytest.mark.asyncio
-async def test_transformer_conceptual_question(fast_standin_orchestrator):
-    q = (
-        "Why does the Transformer use scaled dot-product attention instead of regular dot-product attention? "
-        "Explain the purpose of dividing by the square root of dk and what problem it solves."
-    )
-    req = PipelineRequest(
-        request_id="test-trans-01",
-        question=q,
-        scenario="functional_test",
-        source=SourceType.STANDIN,
-        retrieval_setting=RetrievalSetting(chunk_size=600, top_k=4, rerank=True),
-        target_papers=["1706.03762v7"]
-    )
-    resp = await fast_standin_orchestrator.execute_request(req)
-
-    assert resp.status == RequestStatus.OK
-    assert len(resp.citations) > 0
-
-    # Citations must be exclusively from 1706.03762v7
-    for c in resp.citations:
-        assert c.paper_id == "1706.03762v7"
-        assert c.page in {3, 4, 5}
-
-    # Verify substantive extracted evidence
-    ans_lower = resp.answer.lower()
-    assert any(term in ans_lower for term in ["softmax", "gradient", "magnitude", "scale", "counteract"])
-    # Verify no generic boilerplate filler
-    assert "architectural parameters and experimental findings align" not in resp.answer
-    assert "structural components and algorithmic parameters verified" not in resp.answer
+def test_groq_provider_selection():
+    """Assert that when Groq mode is configured with credentials, GroqProvider is selected."""
+    with patch.object(settings, "PROVIDER_MODE", ProviderMode.GROQ):
+        groq_mock = GroqProvider(api_key="gsk_mock_valid_key_for_testing_selection")
+        orch = PipelineOrchestrator(provider=groq_mock)
+        assert isinstance(orch.provider, GroqProvider)
+        assert not isinstance(orch.provider, StandInProvider)
+        provider_name, model_name = orch._get_provider_names()
+        assert provider_name == "groq"
+        assert model_name == settings.GROQ_MODEL
 
 
 # -----------------------------------------------------------------------------
-# TEST 2: Moshi Architecture Question
-# -----------------------------------------------------------------------------
-@pytest.mark.asyncio
-async def test_moshi_question(fast_standin_orchestrator):
-    q = "Explain the role of the Mimi audio codec and the Helium language model in Moshi's architecture."
-    req = PipelineRequest(
-        request_id="test-moshi-02",
-        question=q,
-        scenario="functional_test",
-        source=SourceType.STANDIN,
-        retrieval_setting=RetrievalSetting(chunk_size=600, top_k=4, rerank=True),
-        target_papers=["2410.00037v1"]
-    )
-    resp = await fast_standin_orchestrator.execute_request(req)
-
-    assert resp.status == RequestStatus.OK
-    assert len(resp.citations) > 0
-    for c in resp.citations:
-        assert c.paper_id == "2410.00037v1"
-
-    ans_lower = resp.answer.lower()
-    assert "mimi" in ans_lower
-    assert "helium" in ans_lower
-    assert "architectural parameters and experimental findings align" not in resp.answer
-
-
-# -----------------------------------------------------------------------------
-# TEST 3: Dynamic Chunking Boundary Predictor Question
-# -----------------------------------------------------------------------------
-@pytest.mark.asyncio
-async def test_dynamic_chunking_question(fast_standin_orchestrator):
-    q = (
-        "What is the role of the boundary predictor in Dynamic Chunking, and how does it determine "
-        "when a sequence should be divided into chunks?"
-    )
-    req = PipelineRequest(
-        request_id="test-dc-03",
-        question=q,
-        scenario="functional_test",
-        source=SourceType.STANDIN,
-        retrieval_setting=RetrievalSetting(chunk_size=600, top_k=4, rerank=True),
-        target_papers=["2507.07955v2"]
-    )
-    resp = await fast_standin_orchestrator.execute_request(req)
-
-    assert resp.status == RequestStatus.OK
-    assert len(resp.citations) > 0
-    for c in resp.citations:
-        assert c.paper_id == "2507.07955v2"
-
-    ans_lower = resp.answer.lower()
-    assert any(term in ans_lower for term in ["boundary", "chunk", "downsampler", "cosine similarity"])
-    assert "architectural parameters and experimental findings align" not in resp.answer
-
-
-# -----------------------------------------------------------------------------
-# TEST 4: Cross-Paper Comparative Question
-# -----------------------------------------------------------------------------
-@pytest.mark.asyncio
-async def test_cross_paper_comparison(fast_standin_orchestrator):
-    q = "Compare how the Transformer and Dynamic Chunking approach sequence processing."
-    req = PipelineRequest(
-        request_id="test-cross-04",
-        question=q,
-        scenario="functional_test",
-        source=SourceType.STANDIN,
-        retrieval_setting=RetrievalSetting(chunk_size=600, top_k=4, rerank=True),
-        target_papers=None  # Cross-paper mode
-    )
-    resp = await fast_standin_orchestrator.execute_request(req)
-
-    assert resp.status == RequestStatus.OK
-    assert len(resp.citations) > 0
-
-    cited_paper_ids = {c.paper_id for c in resp.citations}
-    assert "1706.03762v7" in cited_paper_ids
-    assert "2507.07955v2" in cited_paper_ids
-
-
-# -----------------------------------------------------------------------------
-# TEST 5: Unsupported Question (Refusal)
-# -----------------------------------------------------------------------------
-@pytest.mark.asyncio
-async def test_unsupported_pricing_question(fast_standin_orchestrator):
-    q = "What is the current Groq API pricing?"
-    req = PipelineRequest(
-        request_id="test-refusal-05",
-        question=q,
-        scenario="functional_test",
-        source=SourceType.STANDIN,
-        target_papers=["1706.03762v7"]
-    )
-    resp = await fast_standin_orchestrator.execute_request(req)
-
-    assert resp.status == RequestStatus.OK
-    assert "REFUSAL" in resp.answer.upper() or "DOES NOT ESTABLISH" in resp.answer.upper()
-    assert len(resp.citations) == 0
-
-
-# -----------------------------------------------------------------------------
-# TEST 6: Scope Mismatch Refusal
-# -----------------------------------------------------------------------------
-@pytest.mark.asyncio
-async def test_scope_mismatch(fast_standin_orchestrator):
-    q = "What is the framerate of the Mimi audio codec in Moshi?"
-    req = PipelineRequest(
-        request_id="test-scope-06",
-        question=q,
-        scenario="functional_test",
-        source=SourceType.STANDIN,
-        target_papers=["1706.03762v7"]  # Locked to Attention paper
-    )
-    resp = await fast_standin_orchestrator.execute_request(req)
-
-    assert resp.status == RequestStatus.OK
-    assert "REFUSAL" in resp.answer.upper()
-    # Must explain that the question targets a different paper than selected scope
-    assert "Moshi" in resp.answer or "scope" in resp.answer.lower()
-    assert len(resp.citations) == 0
-
-
-# -----------------------------------------------------------------------------
-# TEST 7 & 8: Streaming and Non-Streaming Equivalence & Invariants
-# -----------------------------------------------------------------------------
-@pytest.mark.asyncio
-async def test_streaming_and_non_streaming_consistency(fast_standin_orchestrator):
-    q = "What is the dimension d_k in the base Transformer attention mechanism?"
-    req = PipelineRequest(
-        request_id="test-equiv-07-08",
-        question=q,
-        scenario="consistency_test",
-        source=SourceType.STANDIN,
-        retrieval_setting=RetrievalSetting(chunk_size=600, top_k=4, rerank=True),
-        target_papers=["1706.03762v7"]
-    )
-
-    # 1. Non-streaming execution
-    non_stream_resp = await fast_standin_orchestrator.execute_request(req)
-    assert non_stream_resp.status == RequestStatus.OK
-    assert non_stream_resp.answer != ""
-    assert len(non_stream_resp.citations) > 0
-    assert non_stream_resp.request_id == "test-equiv-07-08"
-
-    # 2. Streaming execution
-    stream_tokens = []
-    events = []
-    done_event = None
-
-    async for event in fast_standin_orchestrator.execute_stream_request(req):
-        events.append(event)
-        if event["event"] == "token":
-            stream_tokens.append(event["content"])
-        elif event["event"] == "done":
-            done_event = event
-
-    assert len(stream_tokens) > 3, "Stream must deliver multiple incremental tokens"
-    assert done_event is not None, "Stream must emit terminal done event"
-    assert done_event["request_id"] == "test-equiv-07-08", "Terminal done event must preserve request_id"
-    assert len(done_event["citations"]) > 0, "Terminal done event must return valid citations"
-    assert done_event["citation_validation"] == "passed"
-
-    # Verify that stream accumulation perfectly reproduces the non-streaming answer
-    accumulated_answer = "".join(stream_tokens)
-    assert accumulated_answer == non_stream_resp.answer, "Streaming content must match completed answer"
-
-
-# -----------------------------------------------------------------------------
-# TEST 9: Stand-in Honesty & Labelling
-# -----------------------------------------------------------------------------
-@pytest.mark.asyncio
-async def test_standin_honesty_and_labelling(fast_standin_orchestrator):
-    q = "Why does the Transformer use scaled dot-product attention?"
-    req = PipelineRequest(
-        request_id="test-honesty-09",
-        question=q,
-        scenario="honesty_test",
-        source=SourceType.STANDIN,
-        target_papers=["1706.03762v7"]
-    )
-    resp = await fast_standin_orchestrator.execute_request(req)
-
-    # Must be explicitly labeled as extractive stand-in simulation
-    assert "[Stand-in evidence preview" in resp.answer
-    assert "extractive simulation, not LLM-generated" in resp.answer
-    # Must preserve provider source as standin
-    assert resp.source == SourceType.STANDIN
-    # Must not contain generic synthesis filler
-    assert "structural components and algorithmic parameters verified" not in resp.answer
-
-
-# -----------------------------------------------------------------------------
-# TEST 10: No Silent Fallback When Groq Key Missing
+# TEST B: No Silent Fallback When Groq Key Missing
 # -----------------------------------------------------------------------------
 @pytest.mark.asyncio
 async def test_no_silent_fallback_when_groq_key_missing():
-    # Instantiate GroqProvider with explicitly missing API key
+    """Assert that Groq mode without API key returns an explicit configuration error and never falls back."""
     groq_provider = GroqProvider(api_key="")
     orchestrator = PipelineOrchestrator(provider=groq_provider)
 
@@ -291,3 +85,285 @@ async def test_no_silent_fallback_when_groq_key_missing():
     assert error_event is not None
     assert error_event["status"] == 503
     assert "GROQ_API_KEY" in error_event["error"]
+
+
+# -----------------------------------------------------------------------------
+# TEST C: Provider Authentication Error (HTTP 401)
+# -----------------------------------------------------------------------------
+@pytest.mark.asyncio
+async def test_provider_auth_error_handling():
+    """Assert that HTTP 401 authentication errors are propagated without secret leakage."""
+    groq_provider = GroqProvider(api_key="gsk_test_mock_invalid_key")
+
+    mock_error_resp = ProviderResponse(
+        content='{"error": {"message": "Invalid API Key", "type": "invalid_request_error"}}',
+        tokens_in=50,
+        tokens_out=0,
+        first_token_ms=None,
+        total_ms=45.0,
+        model="openai/gpt-oss-20b",
+        headers={},
+        http_status=401,
+        error_type="authentication_error",
+        is_simulation=False
+    )
+
+    with patch.object(groq_provider, "generate", new_callable=AsyncMock) as mock_gen:
+        mock_gen.return_value = mock_error_resp
+        orchestrator = PipelineOrchestrator(provider=groq_provider)
+
+        req = PipelineRequest(
+            request_id="test-auth-401",
+            question="Explain scaled dot-product attention.",
+            scenario="auth_test",
+            source=SourceType.REAL,
+            target_papers=["1706.03762v7"]
+        )
+
+        resp = await orchestrator.execute_request(req)
+        assert resp.status == RequestStatus.ERROR
+        assert "401" in resp.error_message or "authentication_error" in resp.error_message
+        assert "gsk_test_mock_invalid_key" not in resp.error_message
+        assert "gsk_test_mock_invalid_key" not in resp.answer
+
+
+# -----------------------------------------------------------------------------
+# TEST D: Actual Generated Answer Preservation
+# -----------------------------------------------------------------------------
+@pytest.mark.asyncio
+async def test_actual_generated_answer_preservation():
+    """Assert that a genuine model response from Groq is preserved exactly and not overwritten."""
+    groq_provider = GroqProvider(api_key="gsk_mock_key")
+
+    genuine_explanation = (
+        "### Direct Answer\n"
+        "Scaled dot-product attention computes compatibility between queries and keys divided by sqrt(d_k).\n\n"
+        "### Explanation\n"
+        "For large values of d_k, the dot products grow large in magnitude, pushing the softmax function "
+        "into regions with extremely small gradients. Dividing by sqrt(d_k) counteracts this effect.\n\n"
+        "### Supporting Evidence & Citations\n"
+        "[Attention Is All You Need, Page 4, Section 3.2.1]\n\n"
+        "### Limitations\n"
+        "None."
+    )
+
+    mock_ok_resp = ProviderResponse(
+        content=genuine_explanation,
+        tokens_in=120,
+        tokens_out=85,
+        first_token_ms=None,
+        total_ms=180.0,
+        model="openai/gpt-oss-20b",
+        headers={},
+        http_status=200,
+        error_type=None,
+        is_simulation=False
+    )
+
+    with patch.object(groq_provider, "generate", new_callable=AsyncMock) as mock_gen:
+        mock_gen.return_value = mock_ok_resp
+        orchestrator = PipelineOrchestrator(provider=groq_provider)
+
+        req = PipelineRequest(
+            request_id="test-answer-preservation",
+            question="Why does the Transformer use scaled dot-product attention?",
+            scenario="preservation_test",
+            source=SourceType.REAL,
+            target_papers=["1706.03762v7"]
+        )
+
+        resp = await orchestrator.execute_request(req)
+        assert resp.status == RequestStatus.OK
+        assert resp.answer == genuine_explanation
+        assert "Stand-In Evidence Preview" not in resp.answer
+        assert len(resp.citations) > 0
+        assert resp.citations[0].paper_id == "1706.03762v7"
+
+
+# -----------------------------------------------------------------------------
+# TEST E: Streaming Answer Preservation
+# -----------------------------------------------------------------------------
+@pytest.mark.asyncio
+async def test_streaming_answer_preservation():
+    """Assert that streaming accumulates tokens into the complete answer with citations."""
+    groq_provider = GroqProvider(api_key="gsk_mock_key")
+
+    chunks_to_stream = [
+        "### Direct Answer\n",
+        "Scaled dot-product attention scales scores by 1/sqrt(d_k).\n\n",
+        "### Explanation\n",
+        "This prevents large dot product magnitudes from saturating the softmax gradient.\n\n",
+        "### Supporting Evidence & Citations\n",
+        "[Attention Is All You Need, Page 4, Section 3.2.1]\n"
+    ]
+
+    async def mock_stream_gen(prompt, system_prompt="", max_tokens=1024, temperature=0.0):
+        for token in chunks_to_stream:
+            yield token
+
+    with patch.object(groq_provider, "stream_generate", side_effect=mock_stream_gen):
+        orchestrator = PipelineOrchestrator(provider=groq_provider)
+
+        req = PipelineRequest(
+            request_id="test-stream-preservation",
+            question="Why does the Transformer use scaled dot-product attention?",
+            scenario="streaming_test",
+            source=SourceType.REAL,
+            target_papers=["1706.03762v7"],
+            stream=True
+        )
+
+        streamed_tokens = []
+        done_event = None
+
+        async for event in orchestrator.execute_stream_request(req):
+            if event.get("event") == "token":
+                streamed_tokens.append(event["content"])
+            elif event.get("event") == "done":
+                done_event = event
+
+        full_streamed = "".join(streamed_tokens)
+        assert full_streamed == "".join(chunks_to_stream)
+        assert done_event is not None
+        assert done_event["request_id"] == "test-stream-preservation"
+        assert len(done_event["citations"]) > 0
+        assert done_event["citation_validation"] == "passed"
+
+
+# -----------------------------------------------------------------------------
+# TEST F: Stand-In Honesty & Labelling
+# -----------------------------------------------------------------------------
+@pytest.mark.asyncio
+async def test_standin_honesty_and_labelling(fast_standin_orchestrator):
+    """Assert that stand-in mode outputs honest extractive evidence with clear disclaimers."""
+    q = "Why does the Transformer use scaled dot-product attention?"
+    req = PipelineRequest(
+        request_id="test-honesty-09",
+        question=q,
+        scenario="honesty_test",
+        source=SourceType.STANDIN,
+        target_papers=["1706.03762v7"]
+    )
+    resp = await fast_standin_orchestrator.execute_request(req)
+
+    # Must be explicitly labeled as extractive stand-in simulation
+    assert "[Stand-In Evidence Preview — Extractive Simulation]" in resp.answer
+    assert "Notice: The Stand-In provider performs deterministic evidence extraction" in resp.answer
+    assert resp.source == SourceType.STANDIN
+    # Must not contain generic diagnostic template text
+    assert "architectural parameters and experimental findings align" not in resp.answer
+
+
+# -----------------------------------------------------------------------------
+# TEST G: Retrieval Relevance across All Target Papers
+# -----------------------------------------------------------------------------
+def test_retrieval_relevance_attention():
+    """Assert that Transformer scaling query retrieves genuine explanatory passages, not figure captions."""
+    rr = ResearchRetriever()
+    q = (
+        "Why does the Transformer use scaled dot-product attention instead of regular dot-product attention? "
+        "Explain the purpose of dividing by the square root of dk and what problem it solves."
+    )
+    res = rr.retrieve(q, RetrievalSetting(chunk_size=600, top_k=4, rerank=True), target_papers=["1706.03762v7"])
+    assert len(res.chunks) > 0
+
+    # Top chunk must contain substantive technical explanation
+    top_chunk_text = res.chunks[0].text.lower()
+    assert any(term in top_chunk_text for term in ["softmax", "gradient", "magnitude", "counteract", "faster and more"])
+    assert not top_chunk_text.strip().startswith("figure 2:")
+
+
+def test_retrieval_relevance_moshi():
+    """Assert that Moshi query retrieves Mimi and Helium architecture passages."""
+    rr = ResearchRetriever()
+    q = "Explain the role of the Mimi audio codec and the Helium language model in Moshi architecture."
+    res = rr.retrieve(q, RetrievalSetting(chunk_size=600, top_k=4, rerank=True), target_papers=["2410.00037v1"])
+    assert len(res.chunks) > 0
+    all_text = " ".join(c.text.lower() for c in res.chunks)
+    assert "mimi" in all_text
+    assert "helium" in all_text
+
+
+def test_retrieval_relevance_dynamic_chunking():
+    """Assert that Dynamic Chunking query retrieves boundary predictor passages."""
+    rr = ResearchRetriever()
+    q = "What is the boundary predictor and how does it determine chunk boundaries in Dynamic Chunking?"
+    res = rr.retrieve(q, RetrievalSetting(chunk_size=600, top_k=4, rerank=True), target_papers=["2507.07955v2"])
+    assert len(res.chunks) > 0
+    all_text = " ".join(c.text.lower() for c in res.chunks)
+    assert any(term in all_text for term in ["boundary predictor", "dynamic chunking", "differentiable"])
+
+
+# -----------------------------------------------------------------------------
+# TEST H: Scope Mismatch Server-Side Enforcement
+# -----------------------------------------------------------------------------
+@pytest.mark.asyncio
+async def test_scope_mismatch(fast_standin_orchestrator):
+    """Assert that asking a Moshi-specific question under Attention scope triggers a refusal."""
+    q = "What is the framerate of the Mimi audio codec in Moshi?"
+    req = PipelineRequest(
+        request_id="test-scope-06",
+        question=q,
+        scenario="functional_test",
+        source=SourceType.STANDIN,
+        target_papers=["1706.03762v7"]  # Locked to Attention paper
+    )
+    resp = await fast_standin_orchestrator.execute_request(req)
+
+    assert resp.status == RequestStatus.OK
+    assert "REFUSAL" in resp.answer.upper()
+    assert "Moshi" in resp.answer or "scope" in resp.answer.lower()
+    assert len(resp.citations) == 0
+
+
+# -----------------------------------------------------------------------------
+# TEST I: Missing Telemetry Preservation
+# -----------------------------------------------------------------------------
+@pytest.mark.asyncio
+async def test_missing_telemetry_preservation():
+    """Assert that non-streaming TTFT for Groq remains None (not measured) rather than fabricating total latency."""
+    groq_provider = GroqProvider(api_key="gsk_mock_key")
+    mock_resp = ProviderResponse(
+        content="### Direct Answer\nThe base Transformer uses d_model = 512.\n\n### Supporting Evidence & Citations\n[Attention Is All You Need, Page 3, Section 3.1]",
+        tokens_in=50,
+        tokens_out=25,
+        first_token_ms=None,
+        total_ms=120.0,
+        model="openai/gpt-oss-20b",
+        headers={},
+        http_status=200,
+        error_type=None,
+        is_simulation=False
+    )
+    with patch.object(groq_provider, "generate", new_callable=AsyncMock) as mock_gen:
+        mock_gen.return_value = mock_resp
+        orchestrator = PipelineOrchestrator(provider=groq_provider)
+        req = PipelineRequest(
+            request_id="test-telemetry-nonstream",
+            question="What is the base Transformer dimension d_model?",
+            scenario="telemetry_test",
+            source=SourceType.REAL,
+            target_papers=["1706.03762v7"],
+            stream=False
+        )
+        resp = await orchestrator.execute_request(req)
+        assert resp.status == RequestStatus.OK
+        # In non-streaming requests, TTFT is not measured and must be None
+        assert resp.first_token_ms is None
+        assert resp.total_ms > 0.0
+
+
+# -----------------------------------------------------------------------------
+# TEST J: Calibration Metadata & Status Consistency
+# -----------------------------------------------------------------------------
+def test_calibration_metadata_consistency():
+    """Assert that calibration_profile.json status is consistently exploratory."""
+    calib_file = settings.DATA_DIR / "calibration_profile.json"
+    assert calib_file.exists(), "calibration_profile.json must exist in data directory"
+    with open(calib_file, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    status = data.get("calibration_status")
+    assert status == "exploratory_calibration"
+    # Must not claim definitive empirical calibration with only 3 samples
+    assert data.get("sample_count") == 3

@@ -211,7 +211,7 @@ class StandInProvider(ModelProviderBase):
                 return AnswerGenerator.build_standin_answer(question, chunks, is_refusal=False)
 
         return (
-            "[Stand-in evidence preview — extractive simulation, not LLM-generated] [STAND-IN SYNTHESIS]\n"
+            "[Stand-In Evidence Preview — Extractive Simulation] [STAND-IN SYNTHESIS]\n"
             f"Simulated response for query: {prompt[:80]}...\n"
             "(Notice: Stand-in provider performs offline latency and rate-limit simulation.)"
         )

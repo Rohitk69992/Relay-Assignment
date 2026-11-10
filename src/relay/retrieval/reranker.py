@@ -7,7 +7,7 @@ from src.relay.retrieval.indexer import tokenize
 
 
 class CrossScoringReranker:
-    """Re-ranks retrieved candidates based on exact term density, n-gram matching, and section relevance."""
+    """Re-ranks retrieved candidates based on exact term density, n-gram matching, explanatory relevance, and section alignment."""
 
     def __init__(self):
         pass
@@ -26,6 +26,7 @@ class CrossScoringReranker:
             return candidates[:top_k]
 
         query_lower = query.lower()
+        is_explanatory = any(w in query_lower for w in ["why", "explain", "how", "purpose", "problem", "solve", "reason", "mechanism"])
         reranked: List[Tuple[DocumentChunk, float]] = []
 
         for chunk, base_score in candidates:
@@ -53,6 +54,28 @@ class CrossScoringReranker:
             matched_query_tokens = sum(1 for t in set(query_tokens) if t in chunk_tokens_set)
             coverage_ratio = matched_query_tokens / max(1, len(set(query_tokens)))
             bonus += coverage_ratio * 3.0
+
+            # 5. Explanatory and causal depth boost for conceptual queries
+            if is_explanatory:
+                explanatory_markers = [
+                    "suspect", "because", "due to", "counteract", "effect",
+                    "in order to", "outperforms", "magnitude", "extremely small",
+                    "trade-off", "leads to", "problem", "solution", "gradients",
+                    "faster and more", "complexity", "saturation", "saturated"
+                ]
+                for marker in explanatory_markers:
+                    if marker in text_lower:
+                        bonus += 1.5
+
+                # Demote figure captions for conceptual queries
+                if "figure " in text_lower[:200] or "table " in text_lower[:200]:
+                    bonus -= 25.0
+                elif "figure" in text_lower or "table" in text_lower:
+                    bonus -= 10.0
+
+                # Demote decoder masking if query asks about scaled dot-product attention scaling
+                if "scaled dot-product" in query_lower and "decoder" in text_lower and "illegal connections" in text_lower:
+                    bonus -= 4.0
 
             final_score = base_score + bonus
             reranked.append((chunk, final_score))

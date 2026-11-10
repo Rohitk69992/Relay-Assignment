@@ -3,6 +3,7 @@
 import re
 from typing import List, Optional, Set, Tuple
 from src.relay.schemas import DocumentChunk
+from src.relay.retrieval.indexer import normalize_scientific_notation
 
 
 SYSTEM_PROMPT = """You are a rigorous, technical scientific research assistant answering questions strictly and exclusively from the provided research paper passages.
@@ -96,13 +97,14 @@ class AnswerGenerator:
             "can", "could", "should", "would", "also", "such", "each", "both", "across"
         }
 
-        # Tokenize question content terms
+        # Tokenize question content terms with scientific notation normalization
+        q_norm = normalize_scientific_notation(question)
         q_tokens = [
-            w.lower() for w in re.findall(r'\b[a-zA-Z0-9_\-\.]{3,}\b', question)
-            if w.lower() not in stop_words
+            w.lower() for w in re.findall(r'\b[a-zA-Z0-9_\-\.]{1,}\b', q_norm)
+            if w.lower() not in stop_words and (len(w) >= 3 or w.lower() in {"h", "dk", "d_k", "dv", "d_v", "qk", "q", "k", "v"})
         ]
         if not q_tokens:
-            q_tokens = [w.lower() for w in re.findall(r'\b[a-zA-Z0-9_\-\.]{2,}\b', question)]
+            q_tokens = [w.lower() for w in re.findall(r'\b[a-zA-Z0-9_\-\.]{2,}\b', q_norm)]
 
         # Target paper detection from query keywords
         paper_topic_keywords = {
@@ -118,11 +120,28 @@ class AnswerGenerator:
         scored_candidates: List[Tuple[float, str, DocumentChunk]] = []
 
         for chunk_idx, chunk in enumerate(chunks):
-            raw_text = chunk.text.replace("\r\n", " ").replace("\n", " ")
-            raw_sentences = re.split(r'(?<=[.!?])\s+', raw_text)
+            chunk_norm = normalize_scientific_notation(chunk.text.replace("\r\n", " ").replace("\n", " "))
+            raw_sentences = re.split(r'(?<=[.!?])\s+', chunk_norm)
 
+            # Merge consecutive short mathematical parameter specifications
+            merged_sentences = []
+            buf = ""
             for s in raw_sentences:
-                clean_s = s.strip()
+                s_clean = s.strip()
+                if not s_clean:
+                    continue
+                if buf:
+                    buf += " " + s_clean
+                    merged_sentences.append(buf)
+                    buf = ""
+                elif len(s_clean) < 100 and any(sym in s_clean for sym in ["=", "dk", "dv", "d_k", "d_v", "h ="]):
+                    buf = s_clean
+                else:
+                    merged_sentences.append(s_clean)
+            if buf:
+                merged_sentences.append(buf)
+
+            for clean_s in merged_sentences:
                 if len(clean_s) < 25 or len(clean_s) > 450:
                     continue
                 if not any(c.isalpha() for c in clean_s):
@@ -132,13 +151,17 @@ class AnswerGenerator:
                 # Score based on query tokens matched
                 score = sum(2.0 for t in q_tokens if t in s_lower)
 
-                # Retrieval rank weighting (higher ranked chunks get a bonus)
-                score += max(0.0, 3.0 - chunk_idx * 0.75)
+                # Retrieval rank weighting (higher ranked chunks get a dominant bonus)
+                score += max(0.0, 10.0 - chunk_idx * 3.0)
 
                 # Target paper alignment bonus (if query specifically targets this paper)
                 if detected_targets and chunk.paper_id in detected_targets:
                     score += 5.0
                 elif detected_targets and not is_comparative:
+                    score -= 5.0
+
+                # Demote table discussion / ablation commentary
+                if "table " in s_lower or "ablation" in s_lower:
                     score -= 5.0
 
                 # Technical phrase boosts
@@ -191,7 +214,7 @@ class AnswerGenerator:
                             break
 
         # Format output
-        header = "[Stand-in evidence preview — extractive simulation, not LLM-generated]\n"
+        header = "[Stand-In Evidence Preview — Extractive Simulation]\n"
         passages_text = []
 
         for idx, (sent, chunk) in enumerate(selected, 1):

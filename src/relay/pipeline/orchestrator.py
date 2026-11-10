@@ -195,7 +195,7 @@ class PipelineOrchestrator:
                     answer=refusal_msg,
                     status=RequestStatus.OK,
                     answer_grade=None,
-                    first_token_ms=queue_wait_ms + 10.0,
+                    first_token_ms=None,
                     total_ms=total_ms,
                     queue_wait_ms=queue_wait_ms,
                     processing_ms=total_ms - queue_wait_ms,
@@ -230,7 +230,7 @@ class PipelineOrchestrator:
                         answer=refusal_msg,
                         status=RequestStatus.OK,
                         answer_grade=None,
-                        first_token_ms=queue_wait_ms + 10.0,
+                        first_token_ms=None,
                         total_ms=total_ms,
                         queue_wait_ms=queue_wait_ms,
                         processing_ms=total_ms - queue_wait_ms,
@@ -291,7 +291,7 @@ class PipelineOrchestrator:
                     answer=refusal_msg,
                     status=RequestStatus.OK,
                     answer_grade=None,
-                    first_token_ms=queue_wait_ms + 15.0,
+                    first_token_ms=None,
                     total_ms=total_ms,
                     queue_wait_ms=queue_wait_ms,
                     processing_ms=total_ms - queue_wait_ms,
@@ -326,7 +326,7 @@ class PipelineOrchestrator:
 
                 # Evaluate provider outcome
                 if provider_resp.http_status == 200:
-                    first_token_ms = queue_wait_ms + (provider_resp.first_token_ms or model_timer.elapsed_ms)
+                    first_token_ms = provider_resp.first_token_ms
                     break
 
                 # Handle failure / rate-limit with retry policy

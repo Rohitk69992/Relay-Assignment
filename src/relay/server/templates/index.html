@@ -812,9 +812,14 @@
         const data = await res.json();
         const provElem = document.getElementById('header-provider');
         if (data.provider_mode === 'groq') {
-          provElem.textContent = 'Groq Cloud API (openai/gpt-oss-20b)';
+          if (data.is_groq_available) {
+            provElem.textContent = `Groq Cloud API (${data.groq_model || 'openai/gpt-oss-20b'})`;
+          } else {
+            provElem.textContent = 'Groq Mode (Unconfigured — Missing Key)';
+            provElem.style.borderColor = '#ef4444';
+          }
         } else {
-          provElem.textContent = 'Stand-In Simulator (Calibrated)';
+          provElem.textContent = (data.calibration_status === 'exploratory_calibration' ? 'Stand-In Simulator (Exploratory Calibration)' : 'Stand-In Simulator (Calibrated)');
         }
       } catch (e) {
         document.getElementById('header-provider').textContent = 'Backend Offline';
@@ -1142,7 +1147,7 @@
         // KPIs
         document.getElementById('kpi-total-reqs').textContent = d.total_requests;
         if (d.calibration) {
-          document.getElementById('kpi-calib-status').textContent = d.calibration.calibration_status || 'Calibrated';
+          document.getElementById('kpi-calib-status').textContent = d.calibration.calibration_status || 'Exploratory Calibration';
           document.getElementById('kpi-calib-sub').textContent = `TTFT p50=${d.calibration.p50_target_ms || 'null'}ms, p95=${d.calibration.p95_target_ms || 'null'}ms`;
         }
         if (d.real_probes) {

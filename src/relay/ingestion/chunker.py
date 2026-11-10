@@ -25,7 +25,7 @@ class DocumentChunker:
             if not text:
                 continue
 
-            # If the page text fits in one chunk, emit directly
+            # If the entire page fits in one chunk, emit directly
             if len(text) <= self.chunk_size:
                 chunk_id = f"{page.paper_id}_p{page.page_number}_c0"
                 estimated_tokens = max(1, math.ceil(len(text) / 4.0))
@@ -43,26 +43,51 @@ class DocumentChunker:
                 )
                 continue
 
-            # Sliding window with boundary awareness
-            start = 0
+            # Split page text into sentences preserving scientific punctuation
+            raw_sentences = [s.strip() for s in re.split(r'(?<=[.!?])\s+', text) if s.strip()]
+            if not raw_sentences:
+                raw_sentences = [text]
+
+            # Merge standalone short captions (e.g. "Figure 2: (left) ...") with subsequent sentence
+            merged_sentences: List[str] = []
+            i = 0
+            while i < len(raw_sentences):
+                s = raw_sentences[i]
+                if (s.startswith("Figure ") or s.startswith("Table ")) and len(s) < 120 and (i + 1 < len(raw_sentences)):
+                    merged_sentences.append(f"{s} {raw_sentences[i+1]}")
+                    i += 2
+                else:
+                    merged_sentences.append(s)
+                    i += 1
+
             chunk_idx = 0
-            text_len = len(text)
+            sent_idx = 0
+            n_sents = len(merged_sentences)
 
-            while start < text_len:
-                end = min(start + self.chunk_size, text_len)
+            while sent_idx < n_sents:
+                current_sents: List[str] = []
+                current_len = 0
+                idx = sent_idx
 
-                # Try not to break in the middle of a sentence or word if near end
-                if end < text_len:
-                    # Look for sentence boundary
-                    boundary = text.rfind('. ', start + self.chunk_size // 2, end)
-                    if boundary != -1:
-                        end = boundary + 1
-                    else:
-                        space = text.rfind(' ', start + self.chunk_size // 2, end)
-                        if space != -1:
-                            end = space
+                while idx < n_sents:
+                    s = merged_sentences[idx]
+                    s_len = len(s)
 
-                chunk_text = text[start:end].strip()
+                    # If a single sentence exceeds chunk_size, split by space
+                    if s_len > self.chunk_size and not current_sents:
+                        current_sents.append(s[:self.chunk_size])
+                        idx += 1
+                        break
+
+                    added_len = s_len if not current_sents else (s_len + 1)
+                    if current_len + added_len > self.chunk_size and current_sents:
+                        break
+
+                    current_sents.append(s)
+                    current_len += added_len
+                    idx += 1
+
+                chunk_text = " ".join(current_sents).strip()
                 if chunk_text:
                     chunk_id = f"{page.paper_id}_p{page.page_number}_c{chunk_idx}"
                     estimated_tokens = max(1, math.ceil(len(chunk_text) / 4.0))
@@ -80,8 +105,19 @@ class DocumentChunker:
                     )
                     chunk_idx += 1
 
-                if end >= text_len:
+                if idx >= n_sents:
                     break
-                start = max(start + 1, end - self.chunk_overlap)
+
+                # Calculate overlap: rewind by sentences that fit within chunk_overlap
+                overlap_len = 0
+                rewind_count = 0
+                for back_s in reversed(current_sents):
+                    if overlap_len + len(back_s) <= self.chunk_overlap and rewind_count < len(current_sents) - 1:
+                        overlap_len += len(back_s) + 1
+                        rewind_count += 1
+                    else:
+                        break
+
+                sent_idx = max(sent_idx + 1, idx - rewind_count)
 
         return all_chunks

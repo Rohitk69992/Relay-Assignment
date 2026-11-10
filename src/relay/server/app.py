@@ -82,6 +82,16 @@ async def api_get_papers():
 @app.post("/api/query", response_model=PipelineResponse)
 async def api_execute_query(req: FrontendQueryRequest):
     """Executes the pipeline with strict paper scope enforcement."""
+    # Safe provider validation: fail fast if groq requested without credentials
+    if settings.PROVIDER_MODE == "groq" and not settings.is_groq_available():
+        raise HTTPException(
+            status_code=503,
+            detail=(
+                "Configuration Error: PROVIDER_MODE is configured as 'groq', but GROQ_API_KEY is not configured in .env. "
+                "Please configure GROQ_API_KEY in your local .env file or set PROVIDER_MODE=standin."
+            )
+        )
+
     target_papers = [req.paper_scope] if (req.paper_scope and req.paper_scope != "all") else None
     pipeline_req = PipelineRequest(
         request_id=f"fe-query-{uuid.uuid4().hex[:8]}",
@@ -157,10 +167,24 @@ async def api_experiment_records(
 
 @app.get("/health")
 async def health_check():
+    calib_file = settings.DATA_DIR / "calibration_profile.json"
+    calib_status = "uncalibrated"
+    if calib_file.exists():
+        try:
+            with open(calib_file, "r", encoding="utf-8") as f:
+                calib_status = json.load(f).get("calibration_status", "uncalibrated")
+        except Exception:
+            pass
+    is_groq = settings.PROVIDER_MODE == "groq"
+    key_avail = settings.is_groq_available()
+    overall_status = "misconfigured" if (is_groq and not key_avail) else "healthy"
+
     return {
-        "status": "healthy",
+        "status": overall_status,
         "provider_mode": settings.PROVIDER_MODE,
-        "is_groq_available": settings.is_groq_available(),
+        "is_groq_available": key_avail,
+        "groq_model": settings.GROQ_MODEL,
+        "calibration_status": calib_status,
         "active_queue_depth": orchestrator.queue_mgr.current_queue_depth,
         "peak_queue_depth": orchestrator.queue_mgr.peak_queue_depth
     }
