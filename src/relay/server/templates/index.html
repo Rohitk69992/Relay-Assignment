@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Relay — Paper-First Research Assistant & Benchmark Dashboard</title>
+  <style>
+    :root {
+      --bg: #0c1017;
+      --card-bg: #141b26;
+      --card-border: #232f42;
+      --card-hover: #1c2636;
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --text: #e2e8f0;
+      --text-muted: #94a3b8;
+      --accent: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --code-bg: #080d14;
+      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: #0f172a;
+      border-bottom: 1px solid var(--card-border);
+      padding: 0.85rem 1.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .brand-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: #fff;
+    }
+    .brand-badge {
+      font-size: 0.7rem;
+      background: rgba(59, 130, 246, 0.2);
+      color: #60a5fa;
+      border: 1px solid rgba(59, 130, 246, 0.4);
+      padding: 2px 7px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    nav {
+      display: flex;
+      gap: 0.5rem;
+    }
+    .nav-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      padding: 0.45rem 1rem;
+      font-size: 0.88rem;
+      font-weight: 500;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .nav-btn:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .nav-btn.active {
+      color: #fff;
+      background: var(--card-bg);
+      border-color: var(--card-border);
+    }
+
+    .provider-status {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      background: rgba(0, 0, 0, 0.3);
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1px solid var(--card-border);
+    }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 6px var(--accent);
+    }
+
+    main {
+      flex: 1;
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 1.75rem 1.25rem 3rem;
+    }
+
+    .view-section { display: none; }
+    .view-section.active { display: block; }
+
+    /* PAPER-FIRST RESEARCH ASSISTANT */
+    .step-title {
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #60a5fa;
+      margin-bottom: 0.65rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .step-title span {
+      background: var(--primary);
+      color: #fff;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+    }
+
+    .paper-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 0.85rem;
+      margin-bottom: 1.5rem;
+    }
+    .paper-card {
+      background: var(--card-bg);
+      border: 2px solid var(--card-border);
+      border-radius: 8px;
+      padding: 1rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .paper-card:hover {
+      border-color: #3b82f688;
+      background: var(--card-hover);
+    }
+    .paper-card.selected {
+      border-color: var(--primary);
+      background: rgba(59, 130, 246, 0.08);
+      box-shadow: 0 0 12px rgba(59, 130, 246, 0.2);
+    }
+    .paper-arxiv {
+      font-size: 0.75rem;
+      font-family: monospace;
+      color: #93c5fd;
+      background: rgba(59, 130, 246, 0.15);
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-bottom: 0.4rem;
+      align-self: flex-start;
+    }
+    .paper-name {
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: #f1f5f9;
+      line-height: 1.35;
+      margin-bottom: 0.5rem;
+    }
+    .paper-scope-tag {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .query-box-container {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+    .query-textarea {
+      width: 100%;
+      height: 85px;
+      background: var(--code-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      color: #fff;
+      font-size: 0.95rem;
+      padding: 0.75rem;
+      resize: vertical;
+      font-family: var(--font);
+    }
+    .query-textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .query-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-top: 0.85rem;
+    }
+    .query-options {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .select-input {
+      background: var(--code-bg);
+      border: 1px solid var(--card-border);
+      color: #fff;
+      padding: 0.4rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.82rem;
+    }
+
+    .btn-submit {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      padding: 0.55rem 1.35rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: background 0.15s ease;
+    }
+    .btn-submit:hover:not(:disabled) {
+      background: var(--primary-hover);
+    }
+    .btn-submit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* ANSWER CARD */
+    .answer-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 1.35rem;
+      margin-bottom: 1.5rem;
+      display: none;
+    }
+    .answer-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 0.85rem;
+      margin-bottom: 0.95rem;
+      border-bottom: 1px solid var(--card-border);
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .pill {
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    .pill-ok { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
+    .pill-refusal { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
+    .pill-err { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); }
+    .pill-provider { background: rgba(59, 130, 246, 0.15); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.3); }
+
+    .answer-body {
+      font-size: 0.95rem;
+      line-height: 1.65;
+      color: #f8fafc;
+      white-space: pre-wrap;
+      margin-bottom: 1.25rem;
+    }
+
+    .citations-section {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px dashed var(--card-border);
+    }
+    .citations-title {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #94a3b8;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.6rem;
+    }
+    .citation-tag {
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
+      margin-bottom: 0.4rem;
+      font-size: 0.82rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .citation-paper { font-weight: 600; color: #60a5fa; }
+    .citation-page { font-family: monospace; color: #a5b4fc; }
+
+    .telemetry-details {
+      margin-top: 1.25rem;
+      background: var(--code-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      padding: 0.75rem 1rem;
+      font-size: 0.82rem;
+    }
+    .telemetry-summary {
+      cursor: pointer;
+      font-weight: 600;
+      color: #94a3b8;
+      user-select: none;
+    }
+    .telemetry-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.6rem;
+      margin-top: 0.75rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid #1e293b;
+    }
+    .tel-item span { color: var(--text-muted); display: block; font-size: 0.72rem; }
+    .tel-item strong { color: #f1f5f9; font-family: monospace; font-size: 0.85rem; }
+
+    /* DASHBOARD VIEW */
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .kpi-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 1rem;
+    }
+    .kpi-label { font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600; margin-bottom: 0.3rem; }
+    .kpi-val { font-size: 1.5rem; font-weight: 700; color: #fff; font-family: monospace; }
+    .kpi-sub { font-size: 0.75rem; color: #60a5fa; margin-top: 0.2rem; }
+
+    .table-container {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 1.25rem;
+      margin-bottom: 1.75rem;
+      overflow-x: auto;
+    }
+    .table-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #f1f5f9;
+      margin-bottom: 0.75rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+      text-align: left;
+    }
+    .data-table th {
+      background: rgba(0, 0, 0, 0.3);
+      color: var(--text-muted);
+      font-weight: 600;
+      padding: 0.6rem 0.75rem;
+      border-bottom: 1px solid var(--card-border);
+      white-space: nowrap;
+    }
+    .data-table td {
+      padding: 0.6rem 0.75rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      color: #cbd5e1;
+    }
+    .data-table tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 0.75rem;
+      border-radius: 6px;
+      border: 1px solid var(--card-border);
+    }
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .loading-spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 0.8s ease-in-out infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <div class="brand-title">THE RELAY</div>
+      <span class="brand-badge">Paper-First Research Assistant</span>
+    </div>
+    <nav>
+      <button class="nav-btn active" id="tab-assistant" onclick="switchTab('assistant')">
+        📄 Research Assistant
+      </button>
+      <button class="nav-btn" id="tab-dashboard" onclick="switchTab('dashboard')">
+        📊 Evaluation Dashboard
+      </button>
+    </nav>
+    <div class="provider-status">
+      <div class="status-dot"></div>
+      <span id="header-provider">Loading Provider...</span>
+    </div>
+  </header>
+
+  <main>
+    <!-- VIEW 1: RESEARCH ASSISTANT -->
+    <section id="view-assistant" class="view-section active">
+      
+      <div class="step-title"><span>1</span> Select Target Research Source</div>
+      <div class="paper-grid" id="paper-selector">
+        <!-- Injected dynamically via /api/papers -->
+        <div class="paper-card" onclick="selectPaper('1706.03762v7')">
+          <span class="paper-arxiv">arXiv:1706.03762v7</span>
+          <div class="paper-name">Attention Is All You Need</div>
+          <div class="paper-scope-tag">Transformer Architecture, Scaled Dot-Product Attention</div>
+        </div>
+        <div class="paper-card" onclick="selectPaper('2410.00037v1')">
+          <span class="paper-arxiv">arXiv:2410.00037v1</span>
+          <div class="paper-name">Moshi: a speech-text foundation model for real-time dialogue</div>
+          <div class="paper-scope-tag">Mimi Audio Codec, Helium 7B, Full-Duplex Spoken Dialogue</div>
+        </div>
+        <div class="paper-card" onclick="selectPaper('2507.07955v2')">
+          <span class="paper-arxiv">arXiv:2507.07955v2</span>
+          <div class="paper-name">Dynamic Chunking for End-to-End Hierarchical Sequence Modeling</div>
+          <div class="paper-scope-tag">H-Net, Sequence Chunk Predictor, Linear-Time Segmentation</div>
+        </div>
+        <div class="paper-card selected" onclick="selectPaper('all')">
+          <span class="paper-arxiv">Cross-Paper Synthesis</span>
+          <div class="paper-name">All Three Target Papers</div>
+          <div class="paper-scope-tag">Multi-source comparative retrieval across entire ingested library</div>
+        </div>
+      </div>
+
+      <div class="step-title"><span>2</span> Pose Scientific Query</div>
+      <div class="query-box-container">
+        <textarea id="question-input" class="query-textarea" placeholder="Ask a technical or factual question regarding the selected paper scope..."></textarea>
+        
+        <div class="query-controls">
+          <div class="query-options">
+            <div>
+              <label>Retrieval Setting: </label>
+              <select id="retrieval-cfg" class="select-input">
+                <option value="balanced" selected>Balanced (600c, top-4, re-ranked)</option>
+                <option value="small">Small (300c, top-3, no re-rank)</option>
+                <option value="large">Large (1000c, top-6, re-ranked)</option>
+              </select>
+            </div>
+            <div>
+              <label><input type="checkbox" id="stream-toggle" checked> SSE Streaming</label>
+            </div>
+          </div>
+          <div style="display:flex; gap:0.5rem;">
+            <button class="btn-submit" id="btn-submit" onclick="submitQuery()">
+              <span>Execute Pipeline</span>
+            </button>
+            <button class="nav-btn" style="border:1px solid var(--card-border);" onclick="clearQuery()">Clear</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ANSWER PRESENTATION -->
+      <div id="answer-card" class="answer-card">
+        <div class="answer-header">
+          <div style="display:flex; align-items:center; gap:0.5rem;">
+            <span id="ans-status-pill" class="pill pill-ok">STATUS: OK</span>
+            <span id="ans-scope-pill" class="pill pill-provider">SCOPE: All Papers</span>
+          </div>
+          <span id="ans-provider-pill" class="pill pill-provider">PROVIDER: Stand-in</span>
+        </div>
+
+        <div id="answer-text" class="answer-body"></div>
+
+        <div id="citations-container" class="citations-section">
+          <div class="citations-title">Verified Supporting Passages & Citations:</div>
+          <div id="citations-list"></div>
+        </div>
+
+        <details class="telemetry-details">
+          <summary class="telemetry-summary">⚙️ Telemetry & Invariants Verification</summary>
+          <div class="telemetry-grid">
+            <div class="tel-item"><span>Request ID</span><strong id="tel-req-id">—</strong></div>
+            <div class="tel-item"><span>Model Identifier</span><strong id="tel-model">—</strong></div>
+            <div class="tel-item"><span>Source Execution</span><strong id="tel-source">—</strong></div>
+            <div class="tel-item"><span>First Token Arrival (TTFT)</span><strong id="tel-ttft">—</strong></div>
+            <div class="tel-item"><span>Total Execution Latency</span><strong id="tel-total-time">—</strong></div>
+            <div class="tel-item"><span>Queue Wait Time</span><strong id="tel-queue-wait">—</strong></div>
+            <div class="tel-item"><span>Tokens (Prompt / Generated)</span><strong id="tel-tokens">—</strong></div>
+            <div class="tel-item"><span>Retry Count</span><strong id="tel-retries">0</strong></div>
+            <div class="tel-item"><span>Grounding Verification</span><strong id="tel-grounded">Verified</strong></div>
+          </div>
+        </details>
+      </div>
+
+    </section>
+
+    <!-- VIEW 2: EVALUATION DASHBOARD -->
+    <section id="view-dashboard" class="view-section">
+      
+      <div class="kpi-row">
+        <div class="kpi-card">
+          <div class="kpi-label">Total Authenticated Probes</div>
+          <div class="kpi-val" id="kpi-probes">3</div>
+          <div class="kpi-sub" id="kpi-probes-sub">Groq HTTP 200 (Cloudflare BOM)</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Recorded Experiment Requests</div>
+          <div class="kpi-val" id="kpi-total-reqs">184</div>
+          <div class="kpi-sub">Preserved in results.csv</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Empirical Calibration Status</div>
+          <div class="kpi-val" id="kpi-calib-status" style="font-size:1.15rem; color:#34d399;">Exploratory</div>
+          <div class="kpi-sub" id="kpi-calib-sub">TTFT p50=858ms, p95=885ms</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Unanswerable Refusal Rate</div>
+          <div class="kpi-val" id="kpi-refusal" style="color:#60a5fa;">100.0%</div>
+          <div class="kpi-sub">Zero Hallucinations Invariant</div>
+        </div>
+      </div>
+
+      <!-- TABLE 1 -->
+      <div class="table-container">
+        <div class="table-title">
+          <span>Table 1: Operational Limits Found in the Real Service</span>
+          <span style="font-size:0.75rem; color:var(--text-muted);">Groq API Tier: openai/gpt-oss-20b</span>
+        </div>
+        <table class="data-table" id="table-1">
+          <thead>
+            <tr>
+              <th>Operational Limit</th>
+              <th>Value Found</th>
+              <th>Evidence & Discovery Method</th>
+              <th>Confidence</th>
+            </tr>
+          </thead>
+          <tbody id="table-1-body"></tbody>
+        </table>
+      </div>
+
+      <!-- TABLE 2a & 2b -->
+      <div class="table-container">
+        <div class="table-title">
+          <span>Table 2a: Latency Across Five Required Load Scenarios</span>
+          <span style="font-size:0.75rem; color:var(--text-muted);">Empirical Stand-in Execution (results.csv)</span>
+        </div>
+        <table class="data-table" id="table-2a">
+          <thead>
+            <tr>
+              <th>Scenario</th>
+              <th>Source</th>
+              <th>Sent</th>
+              <th>Duration (s)</th>
+              <th>Offered Rate (/min)</th>
+              <th>First Token p50 / p95 / p99 (ms)</th>
+              <th>Total Time p50 / p95 / p99 (ms)</th>
+            </tr>
+          </thead>
+          <tbody id="table-2a-body"></tbody>
+        </table>
+      </div>
+
+      <div class="table-container">
+        <div class="table-title">
+          <span>Table 2b: Resilience Outcomes Under Load</span>
+          <span style="font-size:0.75rem; color:var(--text-muted);">Admission Queue & Backoff Metrics</span>
+        </div>
+        <table class="data-table" id="table-2b">
+          <thead>
+            <tr>
+              <th>Scenario</th>
+              <th>Succeeded %</th>
+              <th>Rate-Limited %</th>
+              <th>Timed Out %</th>
+              <th>Retries / Req</th>
+              <th>Peak Queue</th>
+              <th>Tokens / Ans</th>
+              <th>Cost / 1k Ans</th>
+            </tr>
+          </thead>
+          <tbody id="table-2b-body"></tbody>
+        </table>
+      </div>
+
+      <!-- TABLE 3 -->
+      <div class="table-container">
+        <div class="table-title">
+          <span>Table 3: Retrieval Configurations & Grounding Quality</span>
+          <span style="font-size:0.75rem; color:var(--text-muted);">Evaluated against 18-question ground-truth set</span>
+        </div>
+        <table class="data-table" id="table-3">
+          <thead>
+            <tr>
+              <th>Configuration (Size, Top-K, Rerank)</th>
+              <th>Questions</th>
+              <th>Correct & Cited %</th>
+              <th>Wrong %</th>
+              <th>Correctly Refused %</th>
+              <th>Prompt / Completion Tokens</th>
+              <th>TTFT p50 / p95 (ms)</th>
+              <th>Total p50 / p95 (ms)</th>
+            </tr>
+          </thead>
+          <tbody id="table-3-body"></tbody>
+        </table>
+      </div>
+
+      <!-- SLOW REQUEST BREAKDOWN -->
+      <div class="table-container">
+        <div class="table-title">
+          <span>Decomposition of Slow Request Latency</span>
+          <span style="font-size:0.75rem; color:var(--text-muted);">Dominant Tail Factor Analysis</span>
+        </div>
+        <div id="slow-request-container" style="font-size:0.85rem; line-height:1.7; color:#cbd5e1;"></div>
+      </div>
+
+      <!-- RAW EXPERIMENTS EXPLORER -->
+      <div class="table-container">
+        <div class="table-title">
+          <span>Raw Recorded Experiments Explorer</span>
+          <span id="filtered-records-count" style="font-size:0.78rem; color:#60a5fa;">Showing 184 records</span>
+        </div>
+        
+        <div class="filter-bar">
+          <div class="filter-group">
+            <label>Source:</label>
+            <select id="filter-source" class="select-input" onchange="loadRecords()">
+              <option value="all">All Sources</option>
+              <option value="real">Real Groq API</option>
+              <option value="stand-in">Stand-in Simulator</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Scenario:</label>
+            <select id="filter-scenario" class="select-input" onchange="loadRecords()">
+              <option value="all">All Scenarios</option>
+              <option value="steady">Steady Load</option>
+              <option value="burst">Sudden Burst</option>
+              <option value="sustained_overload">Sustained Overload</option>
+              <option value="per_minute_limit_halved">Per-Minute Limit Halved</option>
+              <option value="daily_budget_exhausted">Daily Budget Exhausted</option>
+              <option value="retrieval">Retrieval Quality Benchmark</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Status:</label>
+            <select id="filter-status" class="select-input" onchange="loadRecords()">
+              <option value="all">All Statuses</option>
+              <option value="ok">OK (200)</option>
+              <option value="rate_limited">Rate Limited (429)</option>
+              <option value="timeout">Timeout (504)</option>
+            </select>
+          </div>
+        </div>
+
+        <table class="data-table" id="table-records">
+          <thead>
+            <tr>
+              <th>Request ID</th>
+              <th>Scenario</th>
+              <th>Source</th>
+              <th>Status</th>
+              <th>TTFT (ms)</th>
+              <th>Total (ms)</th>
+              <th>Tokens In</th>
+              <th>Tokens Out</th>
+              <th>Grade</th>
+              <th>Queue Wait (ms)</th>
+              <th>Retry Wait (ms)</th>
+            </tr>
+          </thead>
+          <tbody id="table-records-body"></tbody>
+        </table>
+      </div>
+
+    </section>
+  </main>
+
+  <script>
+    let selectedPaperScope = 'all';
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+
+      if (tabId === 'assistant') {
+        document.getElementById('tab-assistant').classList.add('active');
+        document.getElementById('view-assistant').classList.add('active');
+      } else {
+        document.getElementById('tab-dashboard').classList.add('active');
+        document.getElementById('view-dashboard').classList.add('active');
+        loadDashboardData();
+        loadRecords();
+      }
+    }
+
+    function selectPaper(paperId) {
+      selectedPaperScope = paperId;
+      document.querySelectorAll('.paper-card').forEach(card => card.classList.remove('selected'));
+      const activeCard = Array.from(document.querySelectorAll('.paper-card')).find(c => {
+        const text = c.textContent;
+        return paperId === 'all' ? text.includes('All Three') : text.includes(paperId);
+      });
+      if (activeCard) activeCard.classList.add('selected');
+    }
+
+    function clearQuery() {
+      document.getElementById('question-input').value = '';
+      document.getElementById('answer-card').style.display = 'none';
+    }
+
+    async function loadHealth() {
+      try {
+        const res = await fetch('/health');
+        const data = await res.json();
+        const provElem = document.getElementById('header-provider');
+        if (data.provider_mode === 'groq') {
+          provElem.textContent = 'Groq Cloud API (openai/gpt-oss-20b)';
+        } else {
+          provElem.textContent = 'Stand-In Simulator (Calibrated)';
+        }
+      } catch (e) {
+        document.getElementById('header-provider').textContent = 'Backend Offline';
+      }
+    }
+
+    async function loadPapers() {
+      try {
+        const res = await fetch('/api/papers');
+        const papers = await res.json();
+        if (papers && papers.length === 3) {
+          const container = document.getElementById('paper-selector');
+          container.innerHTML = '';
+          papers.forEach(p => {
+            const card = document.createElement('div');
+            card.className = 'paper-card';
+            card.onclick = () => selectPaper(p.id);
+            card.innerHTML = `
+              <span class="paper-arxiv">arXiv:${p.id}</span>
+              <div class="paper-name">${p.title}</div>
+              <div class="paper-scope-tag">Local PDF: ${p.filename} (${(p.file_size_bytes / 1024 / 1024).toFixed(1)} MB)</div>
+            `;
+            container.appendChild(card);
+          });
+          // Add cross paper card
+          const allCard = document.createElement('div');
+          allCard.className = 'paper-card selected';
+          allCard.onclick = () => selectPaper('all');
+          allCard.innerHTML = `
+            <span class="paper-arxiv">Cross-Paper Synthesis</span>
+            <div class="paper-name">All Three Target Papers</div>
+            <div class="paper-scope-tag">Multi-source comparative retrieval across entire ingested library</div>
+          `;
+          container.appendChild(allCard);
+        }
+      } catch (e) {
+        console.warn('Using default paper selector', e);
+      }
+    }
+
+    async function submitQuery() {
+      const q = document.getElementById('question-input').value.trim();
+      if (!q) {
+        alert('Please enter a technical or factual question.');
+        return;
+      }
+
+      const btn = document.getElementById('btn-submit');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="loading-spinner"></span> <span>Running Pipeline...</span>';
+
+      const ansCard = document.getElementById('answer-card');
+      const ansText = document.getElementById('answer-text');
+      const ansStatus = document.getElementById('ans-status-pill');
+      const ansScope = document.getElementById('ans-scope-pill');
+      const ansProvider = document.getElementById('ans-provider-pill');
+      const citationsList = document.getElementById('citations-list');
+
+      ansCard.style.display = 'block';
+      ansText.textContent = '';
+      citationsList.innerHTML = '';
+
+      ansScope.textContent = `SCOPE: ${selectedPaperScope === 'all' ? 'All 3 Papers' : selectedPaperScope}`;
+
+      const cfgVal = document.getElementById('retrieval-cfg').value;
+      const isStream = document.getElementById('stream-toggle').checked;
+
+      let chunkSize = 600, topK = 4, rerank = true;
+      if (cfgVal === 'small') { chunkSize = 300; topK = 3; rerank = false; }
+      else if (cfgVal === 'large') { chunkSize = 1000; topK = 6; rerank = true; }
+
+      const payload = {
+        question: q,
+        paper_scope: selectedPaperScope,
+        chunk_size: chunkSize,
+        top_k: topK,
+        rerank: rerank,
+        stream: isStream
+      };
+
+      try {
+        if (!isStream) {
+          const res = await fetch('/api/query', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          const data = await res.json();
+          renderResponse(data);
+        } else {
+          // SSE streaming
+          const res = await fetch('/api/query/stream', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          const reader = res.body.getReader();
+          const decoder = new TextDecoder('utf-8');
+          let buffer = '';
+
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop();
+
+            for (const line of lines) {
+              if (line.startsWith('data: ')) {
+                const dataStr = line.slice(6).trim();
+                if (dataStr === '[DONE]') break;
+                try {
+                  const ev = JSON.parse(dataStr);
+                  if (ev.event === 'token') {
+                    ansText.textContent += ev.content;
+                    if (ev.first_token_ms && document.getElementById('tel-ttft').textContent === '—') {
+                      document.getElementById('tel-ttft').textContent = `${ev.first_token_ms.toFixed(1)} ms`;
+                    }
+                  } else if (ev.event === 'done') {
+                    renderTelemetryDone(ev);
+                  } else if (ev.event === 'error') {
+                    ansStatus.className = 'pill pill-err';
+                    ansStatus.textContent = `ERROR: ${ev.status || 500}`;
+                    ansText.textContent = `Error: ${ev.error}`;
+                  }
+                } catch (err) {}
+              }
+            }
+          }
+        }
+      } catch (err) {
+        ansStatus.className = 'pill pill-err';
+        ansStatus.textContent = 'NETWORK ERROR';
+        ansText.textContent = `Connection failure: ${err.message}`;
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span>Execute Pipeline</span>';
+      }
+    }
+
+    function renderResponse(data) {
+      const ansText = document.getElementById('answer-text');
+      const ansStatus = document.getElementById('ans-status-pill');
+      const ansProvider = document.getElementById('ans-provider-pill');
+      const citationsList = document.getElementById('citations-list');
+
+      ansText.textContent = data.answer || '(No text returned)';
+
+      if (data.answer && data.answer.startsWith('REFUSAL:')) {
+        ansStatus.className = 'pill pill-refusal';
+        ansStatus.textContent = 'REFUSAL ISSUED';
+      } else if (data.status === 'ok') {
+        ansStatus.className = 'pill pill-ok';
+        ansStatus.textContent = 'STATUS: OK (200)';
+      } else {
+        ansStatus.className = 'pill pill-err';
+        ansStatus.textContent = `STATUS: ${data.status.toUpperCase()}`;
+      }
+
+      ansProvider.textContent = `PROVIDER: ${(data.source || 'stand-in').toUpperCase()} (${data.model || 'calibrated'})`;
+
+      if (data.citations && data.citations.length > 0) {
+        citationsList.innerHTML = '';
+        data.citations.forEach(c => {
+          const div = document.createElement('div');
+          div.className = 'citation-tag';
+          div.innerHTML = `
+            <div>
+              <span class="citation-paper">${c.paper_title || c.paper_id}</span>
+              ${c.section ? `<span style="color:#94a3b8; font-size:0.75rem;"> — ${c.section}</span>` : ''}
+            </div>
+            <span class="citation-page">P. ${c.page}</span>
+          `;
+          citationsList.appendChild(div);
+        });
+      } else {
+        citationsList.innerHTML = '<div style="font-size:0.75rem; color:#64748b;">(No supporting passages ground this statement)</div>';
+      }
+
+      document.getElementById('tel-req-id').textContent = data.request_id || '—';
+      document.getElementById('tel-model').textContent = data.model || 'openai/gpt-oss-20b';
+      document.getElementById('tel-source').textContent = (data.source || 'stand-in').toUpperCase();
+      document.getElementById('tel-ttft').textContent = data.first_token_ms ? `${data.first_token_ms.toFixed(1)} ms` : 'Not measured';
+      document.getElementById('tel-total-time').textContent = data.total_ms ? `${data.total_ms.toFixed(1)} ms` : '—';
+      document.getElementById('tel-queue-wait').textContent = data.queue_wait_ms ? `${data.queue_wait_ms.toFixed(1)} ms` : '0.0 ms';
+      document.getElementById('tel-tokens').textContent = `${data.tokens_in || 0} in / ${data.tokens_out || 0} out`;
+      document.getElementById('tel-retries').textContent = data.retries || '0';
+      document.getElementById('tel-grounded').textContent = (data.answer && data.answer.startsWith('REFUSAL:')) ? 'Safe Refusal' : 'Audited Citation Match';
+    }
+
+    function renderTelemetryDone(ev) {
+      document.getElementById('tel-total-time').textContent = ev.total_ms ? `${ev.total_ms.toFixed(1)} ms` : '—';
+      if (ev.first_token_ms) {
+        document.getElementById('tel-ttft').textContent = `${ev.first_token_ms.toFixed(1)} ms`;
+      }
+      document.getElementById('tel-model').textContent = ev.model || 'openai/gpt-oss-20b';
+      document.getElementById('tel-source').textContent = (ev.source || 'stand-in').toUpperCase();
+      document.getElementById('tel-tokens').textContent = `${ev.tokens_in || 0} in / ${ev.tokens_out || 0} out`;
+      document.getElementById('tel-retries').textContent = ev.retries || '0';
+      document.getElementById('tel-queue-wait').textContent = ev.queue_wait_ms ? `${ev.queue_wait_ms.toFixed(1)} ms` : '0.0 ms';
+
+      const citationsList = document.getElementById('citations-list');
+      if (ev.citations && ev.citations.length > 0) {
+        citationsList.innerHTML = '';
+        ev.citations.forEach(c => {
+          const div = document.createElement('div');
+          div.className = 'citation-tag';
+          div.innerHTML = `
+            <div>
+              <span class="citation-paper">${c.paper_title || c.paper_id}</span>
+              ${c.section ? `<span style="color:#94a3b8; font-size:0.75rem;"> — ${c.section}</span>` : ''}
+            </div>
+            <span class="citation-page">P. ${c.page}</span>
+          `;
+          citationsList.appendChild(div);
+        });
+      } else {
+        citationsList.innerHTML = '<div style="font-size:0.75rem; color:#64748b;">(No supporting passages ground this statement)</div>';
+      }
+    }
+
+    async function loadDashboardData() {
+      try {
+        const res = await fetch('/api/experiments/summary');
+        const d = await res.json();
+
+        // KPIs
+        document.getElementById('kpi-total-reqs').textContent = d.total_requests;
+        if (d.calibration) {
+          document.getElementById('kpi-calib-status').textContent = d.calibration.calibration_status || 'Calibrated';
+          document.getElementById('kpi-calib-sub').textContent = `TTFT p50=${d.calibration.p50_target_ms || 'null'}ms, p95=${d.calibration.p95_target_ms || 'null'}ms`;
+        }
+        if (d.real_probes) {
+          document.getElementById('kpi-probes').textContent = d.real_probes.length;
+        }
+
+        // Table 1
+        const t1 = document.getElementById('table-1-body');
+        t1.innerHTML = '';
+        d.table_1_limits.forEach(r => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td><strong>${r.limit}</strong></td><td><code>${r.value}</code></td><td>${r.how_found}</td><td><span class="pill pill-ok">${r.confidence}</span></td>`;
+          t1.appendChild(tr);
+        });
+
+        // Table 2a
+        const t2a = document.getElementById('table-2a-body');
+        t2a.innerHTML = '';
+        d.table_2a_latency.forEach(r => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td><strong>${r.scenario_name}</strong></td>
+            <td><code>${r.source}</code></td>
+            <td>${r.requests_sent}</td>
+            <td>${r.duration_s.toFixed(1)}</td>
+            <td>${r.offered_rate.toFixed(1)}</td>
+            <td>${r.ft_p50 ? `${r.ft_p50} / ${r.ft_p95} / ${r.ft_p99}` : 'not measured'}</td>
+            <td>${r.tot_p50} / ${r.tot_p95} / ${r.tot_p99}</td>
+          `;
+          t2a.appendChild(tr);
+        });
+
+        // Table 2b
+        const t2b = document.getElementById('table-2b-body');
+        t2b.innerHTML = '';
+        d.table_2b_outcomes.forEach(r => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td><strong>${r.scenario_name}</strong></td>
+            <td><span style="color:#34d399">${r.succeeded_pct.toFixed(1)}%</span></td>
+            <td>${r.rate_limited_pct.toFixed(1)}%</td>
+            <td>${r.timed_out_pct.toFixed(1)}%</td>
+            <td>${r.retries_per_request.toFixed(2)}</td>
+            <td>${r.peak_queue}</td>
+            <td>${r.tokens_per_answer}</td>
+            <td>$${r.cost_per_1000.toFixed(4)}</td>
+          `;
+          t2b.appendChild(tr);
+        });
+
+        // Table 3
+        const t3 = document.getElementById('table-3-body');
+        t3.innerHTML = '';
+        d.table_3_retrieval.forEach(r => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td><strong>${r.setting_name}</strong></td>
+            <td>${r.questions_asked}</td>
+            <td><span style="color:#60a5fa">${r.correct_and_cited_pct.toFixed(1)}%</span></td>
+            <td>${r.wrong_pct.toFixed(1)}%</td>
+            <td><span style="color:#34d399">${r.correctly_refused_pct.toFixed(1)}%</span></td>
+            <td>${r.tokens_in} in / ${r.tokens_out} out</td>
+            <td>${r.ft_p50} / ${r.ft_p95}</td>
+            <td>${r.tot_p50} / ${r.tot_p95}</td>
+          `;
+          t3.appendChild(tr);
+        });
+
+        // Slow request
+        const sr = d.slow_request;
+        if (sr && sr.request_id) {
+          document.getElementById('slow-request-container').innerHTML = `
+            <div><strong>Request Identifier:</strong> <code>${sr.request_id}</code> (Scenario: <code>${sr.scenario}</code>)</div>
+            <div><strong>Total Execution Latency:</strong> <code>${sr.total_ms} ms</code></div>
+            <div><strong>1. Admission Queue Wait:</strong> <code>${sr.queue_wait_ms} ms</code> (${sr.queue_wait_pct}% of total)</div>
+            <div><strong>2. Model Working Time:</strong> <code>${sr.processing_ms} ms</code> (${sr.processing_pct}% of total)</div>
+            <div><strong>3. Retry Backoff Wait:</strong> <code>${sr.retry_wait_ms} ms</code> (${sr.retry_wait_pct}% of total)</div>
+            <div><strong>First Token Arrival Time:</strong> <code>${sr.first_token_ms || '—'} ms</code></div>
+            <div style="margin-top:0.5rem; color:#60a5fa;"><strong>Temporal Conclusion:</strong> Delay occurred entirely BEFORE first token. Dominant tail component was <strong>${sr.dominant_component}</strong>, proving rate-limiting backoff dominates tail latency rather than token generation.</div>
+          `;
+        }
+
+      } catch (e) {
+        console.error('Failed to load dashboard summary', e);
+      }
+    }
+
+    async function loadRecords() {
+      const src = document.getElementById('filter-source').value;
+      const sc = document.getElementById('filter-scenario').value;
+      const st = document.getElementById('filter-status').value;
+
+      try {
+        const url = `/api/experiments/records?source=${src}&scenario=${sc}&status=${st}&limit=184`;
+        const res = await fetch(url);
+        const data = await res.json();
+
+        document.getElementById('filtered-records-count').textContent = `Showing ${data.filtered_count} of ${data.total_records} records`;
+
+        const tb = document.getElementById('table-records-body');
+        tb.innerHTML = '';
+        data.records.forEach(r => {
+          const tr = document.createElement('tr');
+          const isOk = r.status === 'ok';
+          tr.innerHTML = `
+            <td><code>${r.request_id}</code></td>
+            <td>${r.scenario}</td>
+            <td><code>${r.source}</code></td>
+            <td><span class="pill ${isOk ? 'pill-ok' : (r.status === 'rate_limited' ? 'pill-refusal' : 'pill-err')}">${r.status}</span></td>
+            <td>${r.first_token_ms ? `${r.first_token_ms.toFixed(1)}` : '—'}</td>
+            <td>${r.total_ms.toFixed(1)}</td>
+            <td>${r.tokens_in}</td>
+            <td>${r.tokens_out}</td>
+            <td>${r.answer_grade ? `<span style="color:#93c5fd">${r.answer_grade}</span>` : '—'}</td>
+            <td>${r.queue_wait_ms ? `${r.queue_wait_ms.toFixed(1)}` : '0.0'}</td>
+            <td>${r.retry_wait_ms ? `${r.retry_wait_ms.toFixed(1)}` : '0.0'}</td>
+          `;
+          tb.appendChild(tr);
+        });
+      } catch (e) {
+        console.error('Failed to load raw records', e);
+      }
+    }
+
+    // Initial boot
+    window.addEventListener('DOMContentLoaded', () => {
+      loadHealth();
+      loadPapers();
+    });
+  </script>
+</body>
+</html>

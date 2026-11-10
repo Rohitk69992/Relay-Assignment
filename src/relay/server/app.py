@@ -1,11 +1,13 @@
-"""FastAPI application exposing The Relay pipeline endpoints."""
+"""FastAPI application exposing The Relay pipeline endpoints, research assistant, and evaluation dashboard."""
 
 import json
+from pathlib import Path
+from typing import AsyncIterator, List, Optional
 import uuid
-from typing import AsyncIterator, Optional
 from fastapi import FastAPI, HTTPException, Request, Response
-from fastapi.responses import StreamingResponse
+from fastapi.responses import HTMLResponse, StreamingResponse
 from pydantic import BaseModel, Field
+
 from src.relay.config import settings
 from src.relay.logging_setup import get_logger
 from src.relay.pipeline.orchestrator import PipelineOrchestrator
@@ -16,12 +18,17 @@ from src.relay.schemas import (
     RetrievalSetting,
     SourceType
 )
+from src.relay.server.dashboard_service import (
+    get_experiment_summary,
+    get_filtered_records,
+    get_papers_metadata
+)
 
 logger = get_logger("relay.server")
 
 app = FastAPI(
     title="The Relay Assistant API",
-    description="Resilient, grounded research paper assistant with admission control and streaming telemetry",
+    description="Resilient, grounded research paper assistant with admission control, paper-first UI, and evaluation dashboard",
     version="1.0.0"
 )
 
@@ -42,6 +49,111 @@ class ChatCompletionRequest(BaseModel):
     top_k: int = 4
     rerank: bool = True
 
+
+class FrontendQueryRequest(BaseModel):
+    question: str
+    paper_scope: str = "all"  # Specific arXiv ID or "all"
+    chunk_size: int = 600
+    top_k: int = 4
+    rerank: bool = True
+    stream: bool = False
+
+
+# ---------------------------------------------------------
+# FRONTEND & DASHBOARD ENDPOINTS
+# ---------------------------------------------------------
+
+@app.get("/", response_class=HTMLResponse)
+async def serve_frontend():
+    """Serves the paper-first research assistant and evaluation dashboard SPA."""
+    template_path = Path(__file__).parent / "templates" / "index.html"
+    if template_path.exists():
+        with open(template_path, "r", encoding="utf-8") as f:
+            return HTMLResponse(content=f.read())
+    return HTMLResponse(content="<h1>The Relay Frontend (Template Missing)</h1>", status_code=404)
+
+
+@app.get("/api/papers")
+async def api_get_papers():
+    """Returns authoritative metadata for the 3 target papers."""
+    return get_papers_metadata()
+
+
+@app.post("/api/query", response_model=PipelineResponse)
+async def api_execute_query(req: FrontendQueryRequest):
+    """Executes the pipeline with strict paper scope enforcement."""
+    target_papers = [req.paper_scope] if (req.paper_scope and req.paper_scope != "all") else None
+    pipeline_req = PipelineRequest(
+        request_id=f"fe-query-{uuid.uuid4().hex[:8]}",
+        question=req.question,
+        scenario="interactive_frontend",
+        source=SourceType.REAL if settings.PROVIDER_MODE == "groq" else SourceType.STANDIN,
+        retrieval_setting=RetrievalSetting(
+            chunk_size=req.chunk_size,
+            top_k=req.top_k,
+            rerank=req.rerank
+        ),
+        target_papers=target_papers,
+        stream=False
+    )
+    return await orchestrator.execute_request(pipeline_req)
+
+
+@app.post("/api/query/stream")
+async def api_execute_stream_query(req: FrontendQueryRequest):
+    """Executes the pipeline with paper scope enforcement, streaming tokens via SSE."""
+    target_papers = [req.paper_scope] if (req.paper_scope and req.paper_scope != "all") else None
+    pipeline_req = PipelineRequest(
+        request_id=f"fe-stream-{uuid.uuid4().hex[:8]}",
+        question=req.question,
+        scenario="interactive_frontend",
+        source=SourceType.REAL if settings.PROVIDER_MODE == "groq" else SourceType.STANDIN,
+        retrieval_setting=RetrievalSetting(
+            chunk_size=req.chunk_size,
+            top_k=req.top_k,
+            rerank=req.rerank
+        ),
+        target_papers=target_papers,
+        stream=True
+    )
+
+    async def event_generator() -> AsyncIterator[str]:
+        async for chunk in orchestrator.execute_stream_request(pipeline_req):
+            yield f"data: {json.dumps(chunk)}\n\n"
+        yield "data: [DONE]\n\n"
+
+    return StreamingResponse(event_generator(), media_type="text/event-stream")
+
+
+@app.get("/api/experiments/summary")
+async def api_experiment_summary():
+    """Returns authoritative summary tables (Table 1, 2a, 2b, 3, slow breakdown, calibration)."""
+    return get_experiment_summary()
+
+
+@app.get("/api/experiments/records")
+async def api_experiment_records(
+    source: Optional[str] = None,
+    scenario: Optional[str] = None,
+    retrieval_setting: Optional[str] = None,
+    status: Optional[str] = None,
+    limit: int = 200,
+    offset: int = 0
+):
+    """Returns filtered individual rows from results.csv."""
+    return get_filtered_records(
+        source=source,
+        scenario=scenario,
+        retrieval_setting=retrieval_setting,
+        status=status,
+        limit=limit,
+        offset=offset
+    )
+
+
+# ---------------------------------------------------------
+# SYSTEM METRICS & PROTOCOL ENDPOINTS
+# ---------------------------------------------------------
 
 @app.get("/health")
 async def health_check():

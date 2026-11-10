@@ -170,7 +170,8 @@ class PipelineOrchestrator:
             # STAGE 3: Research-Paper Retrieval Tool Invocation
             retrieval_result = self.retriever.retrieve(
                 query=query_plan.original_query,
-                setting=request.retrieval_setting
+                setting=request.retrieval_setting,
+                target_papers=request.target_papers
             )
             chunks = retrieval_result.chunks
 
@@ -185,7 +186,8 @@ class PipelineOrchestrator:
                 # Perform bounded refinement loop (at most 1 iteration)
                 refined_result = self.retriever.retrieve(
                     query=refined_query,
-                    setting=request.retrieval_setting
+                    setting=request.retrieval_setting,
+                    target_papers=request.target_papers
                 )
                 chunks = refined_result.chunks
                 retrieval_result.refinement_performed = True
@@ -197,9 +199,14 @@ class PipelineOrchestrator:
 
             # Check if evidence is still insufficient (e.g. key terms completely absent)
             if not is_sufficient or not chunks:
+                scope_desc = (
+                    f"in the selected paper scope ({', '.join(request.target_papers)})"
+                    if (request.target_papers and "all" not in request.target_papers)
+                    else "in the supplied research library"
+                )
                 refusal_msg = (
-                    "REFUSAL: The supplied research library does not establish the answer to this question. "
-                    "The ingested papers do not contain sufficient evidence on this topic."
+                    f"REFUSAL: The evidence {scope_desc} does not establish the answer to this question. "
+                    f"{reason or 'The paper does not contain sufficient evidence on this topic.'}"
                 )
                 total_ms = total_timer.mark_complete()
                 return PipelineResponse(
@@ -217,7 +224,9 @@ class PipelineOrchestrator:
                     retries=0,
                     tokens_in=max(10, len(request.question) // 4),
                     tokens_out=25,
-                    retrieval_setting=request.retrieval_setting.label
+                    retrieval_setting=request.retrieval_setting.label,
+                    target_papers=request.target_papers,
+                    model=getattr(self.provider, "model", "stand-in-calibrated")
                 )
 
             # STAGE 6: Answer Generation via Model Provider with Retry Management
@@ -315,6 +324,8 @@ class PipelineOrchestrator:
                 tokens_in=provider_resp.tokens_in,
                 tokens_out=provider_resp.tokens_out,
                 retrieval_setting=request.retrieval_setting.label,
+                target_papers=request.target_papers,
+                model=provider_resp.model or getattr(self.provider, "model", "stand-in-calibrated"),
                 error_message=None
             )
 
@@ -362,23 +373,47 @@ class PipelineOrchestrator:
                 return
 
             # Retrieval tool
-            retrieval_result = self.retriever.retrieve(query_plan.original_query, request.retrieval_setting)
+            retrieval_result = self.retriever.retrieve(
+                query=query_plan.original_query,
+                setting=request.retrieval_setting,
+                target_papers=request.target_papers
+            )
             chunks = retrieval_result.chunks
 
             # Sufficiency check
-            is_sufficient, refined_query, _ = self.sufficiency_evaluator.evaluate(query_plan, chunks, refinement_count=0)
+            is_sufficient, refined_query, reason = self.sufficiency_evaluator.evaluate(query_plan, chunks, refinement_count=0)
             if not is_sufficient and refined_query != query_plan.original_query:
-                refined_result = self.retriever.retrieve(refined_query, request.retrieval_setting)
+                refined_result = self.retriever.retrieve(
+                    query=refined_query,
+                    setting=request.retrieval_setting,
+                    target_papers=request.target_papers
+                )
                 chunks = refined_result.chunks
                 is_sufficient, _, _ = self.sufficiency_evaluator.evaluate(query_plan, chunks, refinement_count=1)
 
             if not is_sufficient or not chunks:
+                scope_desc = (
+                    f"in the selected paper scope ({', '.join(request.target_papers)})"
+                    if (request.target_papers and "all" not in request.target_papers)
+                    else "in the supplied research library"
+                )
                 refusal_msg = (
-                    "REFUSAL: The supplied research library does not establish the answer to this question. "
-                    "The ingested papers do not contain sufficient evidence on this topic."
+                    f"REFUSAL: The evidence {scope_desc} does not establish the answer to this question. "
+                    f"{reason or 'The paper does not contain sufficient evidence on this topic.'}"
                 )
                 yield {"event": "token", "content": refusal_msg, "first_token_ms": queue_wait_ms + 15.0}
-                yield {"event": "done", "total_ms": total_timer.mark_complete(), "citations": [], "verified": True}
+                yield {
+                    "event": "done",
+                    "total_ms": total_timer.mark_complete(),
+                    "citations": [],
+                    "verified": True,
+                    "model": getattr(self.provider, "model", "stand-in-calibrated"),
+                    "source": request.source.value,
+                    "tokens_in": max(10, len(request.question) // 4),
+                    "tokens_out": 25,
+                    "retries": 0,
+                    "queue_wait_ms": queue_wait_ms
+                }
                 return
 
             # Grounded generation streaming
@@ -405,7 +440,13 @@ class PipelineOrchestrator:
                 "first_token_ms": first_token_ms,
                 "total_ms": total_timer.mark_complete(),
                 "citations": [c.model_dump() for c in citations],
-                "verified": is_grounded
+                "verified": is_grounded,
+                "model": getattr(self.provider, "model", "stand-in-calibrated"),
+                "source": request.source.value,
+                "tokens_in": max(10, len(user_prompt) // 4),
+                "tokens_out": max(10, len(full_answer) // 4),
+                "retries": 0,
+                "queue_wait_ms": queue_wait_ms
             }
 
         finally:

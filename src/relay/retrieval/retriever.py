@@ -55,18 +55,26 @@ class ResearchRetriever:
     def retrieve(
         self,
         query: str,
-        setting: Optional[RetrievalSetting] = None
+        setting: Optional[RetrievalSetting] = None,
+        target_papers: Optional[List[str]] = None
     ) -> RetrievalResult:
-        """Explicit retrieval tool callable by the pipeline."""
+        """Explicit retrieval tool callable by the pipeline with optional paper scope restriction."""
         start_time = time.perf_counter()
         cfg = setting or RetrievalSetting()
 
         index = self.get_index(chunk_size=cfg.chunk_size, chunk_overlap=cfg.chunk_overlap)
-        # Fetch candidate pool (2x top_k if reranking, else top_k)
-        fetch_k = cfg.top_k * 2 if cfg.rerank else cfg.top_k
-        candidates = index.search(query, top_k=fetch_k)
+        
+        # If paper scope is restricted, filter candidates strictly to target_papers
+        valid_papers = set(target_papers) if (target_papers and "all" not in target_papers) else None
+        fetch_k = (cfg.top_k * 4) if cfg.rerank else (cfg.top_k * 2)
+        raw_candidates = index.search(query, top_k=min(len(index.chunks), max(fetch_k, 50)))
 
-        if cfg.rerank:
+        if valid_papers:
+            candidates = [c for c in raw_candidates if c[0].paper_id in valid_papers][:fetch_k]
+        else:
+            candidates = raw_candidates[:fetch_k]
+
+        if cfg.rerank and candidates:
             final_scored = self.reranker.rerank(query, candidates, top_k=cfg.top_k)
         else:
             final_scored = candidates[:cfg.top_k]
@@ -74,10 +82,14 @@ class ResearchRetriever:
         chunks = [c for c, _ in final_scored]
         elapsed_ms = (time.perf_counter() - start_time) * 1000.0
 
-        # Evaluate sufficiency threshold: does top chunk score above minimal threshold?
+        # Evaluate sufficiency threshold
         is_sufficient = True
         reason = "Passages retrieved with sufficient match confidence."
-        if not chunks or (final_scored and final_scored[0][1] < 1.0):
+        if not chunks:
+            is_sufficient = False
+            scope_str = ", ".join(valid_papers) if valid_papers else "the library"
+            reason = f"No relevant passages found within the selected paper scope ({scope_str})."
+        elif final_scored and final_scored[0][1] < 1.0:
             is_sufficient = False
             reason = "Retrieved candidate scores fall below relevance threshold."
 

@@ -71,6 +71,7 @@ class PipelineRequest(BaseModel):
     scenario: str = Field(default="interactive", description="Benchmark scenario or interactive label")
     source: SourceType = Field(default=SourceType.STANDIN)
     retrieval_setting: RetrievalSetting = Field(default_factory=RetrievalSetting)
+    target_papers: Optional[List[str]] = Field(default=None, description="Scope restriction to specific paper IDs, or None for all")
     stream: bool = Field(default=False)
 
 
@@ -92,6 +93,8 @@ class PipelineResponse(BaseModel):
     tokens_in: int = 0
     tokens_out: int = 0
     retrieval_setting: str
+    target_papers: Optional[List[str]] = None
+    model: Optional[str] = None
     error_message: Optional[str] = None
 
 
