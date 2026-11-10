@@ -11,6 +11,7 @@ ENV/
 
 # Configuration and Secrets
 .env
+.env.example
 *.local.env
 
 # Testing & Coverage
@@ -26,6 +27,9 @@ htmlcov/
 scratch/
 tmp/
 .system_generated/
+
+# LaTeX Sources
+*.tex
 
 # Documentation
 docs/
